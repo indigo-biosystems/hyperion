@@ -23,4 +23,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'oj', '>= 2.11.1'
   spec.add_runtime_dependency 'typhoeus', '>= 0.6.9'
   spec.add_runtime_dependency 'immutable_struct', '>= 1.1.1'
+  spec.add_runtime_dependency 'mimic', '>= 0.4.3'
 end

@@ -10,6 +10,7 @@ class Hyperion
 
   ResponseParams = ImmutableStruct.new(:type, :version, :format)
 
+  # TODO: possibly provide an "overload" that takes a base_uri and path separately
   def self.get(uri, response_params)
     self.new(uri, response_params).get
   end
@@ -19,7 +20,7 @@ class Hyperion
   end
 
   def initialize(uri, response_params)
-    @uri = uri
+    @uri_base, @port, @path = split_uri(uri)
     @response_params = response_params
   end
 
@@ -35,8 +36,35 @@ class Hyperion
 
   def request(method, headers={}, body=nil)
     all_headers = default_headers(@response_params.type, @response_params.version, @response_params.format).merge(headers)
-    response = Typho.request(@uri, method: method, headers: all_headers, body: body)
+    response = Typho.request(full_uri, method: method, headers: all_headers, body: body)
     make_result(response)
+  end
+
+  def split_uri(uri)
+    m = uri.match(%r{(?<uri_base>(?<proto>https?)://[^:/]+)(?::(?<port>\d+))?(?<path>/.*)})
+    [m[:uri_base], m[:port] || default_port(m[:proto]), m[:path]]
+  end
+
+  def full_uri
+    File.join("#{uri_base}:#{@port}", @path)
+  end
+
+  # let Hyperion::Test pass us a fake one
+  def uri_base
+    @uri_base
+  end
+
+  def default_port(proto)
+    case proto
+      when 'http'; 80
+      when 'https'; 443
+      else; "Unexpected proto: #{proto}"
+    end
+  end
+
+  # give Hyperion::Test a shot at changing the uri for stubbing purposes
+  def transform_uri(uri)
+    uri
   end
 
   def make_result(t)
