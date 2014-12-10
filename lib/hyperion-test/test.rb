@@ -24,8 +24,8 @@ class Hyperion
           send(method, path) do
             matched = setup.rules.
                 select{|r| r.method == method && r.path == path}.
-                detect{|r| this.is_subhash(self.headers, headers)}
-            matched.handler.call(this.make_req_obj(request.body.read, self.request.env['CONTENT_TYPE']))
+                detect{|r| this.send(:is_subhash, self.headers, headers)}
+            matched.handler.call(this.send(:make_req_obj, request.body.read, self.request.env['CONTENT_TYPE']))
           end
         end
       end
@@ -35,6 +35,8 @@ class Hyperion
       base_uri_mapping.clear
       Mimic.cleanup!
     end
+
+    private
 
     def remapped_base_uri(base_uri)
       base_uri_mapping.fetch(base_uri) {|x|x}
@@ -70,6 +72,6 @@ class Hyperion
   private
 
   def uri_base
-    self.class.remapped_base_uri(@uri_base)
+    self.class.send(:remapped_base_uri, @uri_base)
   end
 end
