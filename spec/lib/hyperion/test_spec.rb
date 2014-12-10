@@ -1,4 +1,5 @@
 require 'spec_helper'
+require 'hyperion-test/test'
 
 describe Hyperion do
   include Hyperion::Formats
@@ -11,6 +12,9 @@ describe Hyperion do
   # end
 
   shared_examples 'a web server' do
+    after :each do
+      Hyperion.teardown
+    end
     it 'implements specific routes' do
       Hyperion.send(type, 'http://yoursite.com:3000') do |svr|
         svr.allow(:get, '/users/0') do
@@ -28,7 +32,7 @@ describe Hyperion do
       expect(result.body).to eql({'name' => 'freddy'})
 
       response_params = Hyperion::ResponseParams.new('greeting', 1, :json)
-      result = Hyperion.post('http://yoursite.com:3000/say_hello', response_params, to_json({'name' => 'freddy'}), :json)
+      result = Hyperion.post('http://yoursite.com:3000/say_hello', response_params, write({'name' => 'freddy'}, :json), :json)
       expect(result.code).to eql 200
       expect(result.status).to eql Hyperion::Result::Status::SUCCESS
       expect(result.body).to eql({'greeting' => 'hello, freddy'})

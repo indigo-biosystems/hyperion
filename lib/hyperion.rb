@@ -1,7 +1,7 @@
 require_relative './hyperion/util.rb'
 require 'immutable_struct'
-Hyperion::Util.require_recursive '.'
-
+# Hyperion::Util.require_recursive '.' #TODO: extract the requiring into utils or someplace
+Dir.glob(File.join(File.dirname(__FILE__), "hyperion/**/*.rb")).each{|path| require_relative(path)}
 require 'typhoeus'
 require 'oj'
 
@@ -40,11 +40,6 @@ class Hyperion
     make_result(response)
   end
 
-  def split_uri(uri)
-    m = uri.match(%r{(?<uri_base>(?<proto>https?)://[^:/]+)(?::(?<port>\d+))?(?<path>/.*)})
-    [m[:uri_base], m[:port] || default_port(m[:proto]), m[:path]]
-  end
-
   def full_uri
     File.join("#{uri_base}:#{@port}", @path)
   end
@@ -54,7 +49,16 @@ class Hyperion
     @uri_base
   end
 
-  def default_port(proto)
+  def split_uri(uri)
+    self.class.split_uri(uri)
+  end
+
+  def self.split_uri(uri)
+    m = uri.match(%r{(?<uri_base>(?<proto>https?)://[^:/]+)(?::(?<port>\d+))?(?<path>/.*)?})
+    [m[:uri_base], m[:port] || default_port(m[:proto]), m[:path] || '/']
+  end
+
+  def self.default_port(proto)
     case proto
       when 'http'; 80
       when 'https'; 443

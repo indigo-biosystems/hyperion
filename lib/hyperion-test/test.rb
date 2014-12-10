@@ -9,6 +9,8 @@ class Hyperion
     include Headers
 
     def fake(base_uri_with_port)
+      original_uri, @fake_port = split_uri(base_uri_with_port)
+      base_uri_mapping[original_uri] = 'http://localhost'
       setup = Setup.new
       yield setup
       run_fake_server(setup)
@@ -16,26 +18,39 @@ class Hyperion
 
     def run_fake_server(setup)
       routes = setup.rules.map{|r| [r.method, r.path]}.uniq
-      Mimic.mimic do
+      this = self
+      Mimic.mimic(port: @fake_port) do
         routes.each do |(method, path)|
           send(method, path) do
-            matched = rules.
+            matched = setup.rules.
                 select{|r| r.method == method && r.path == path}.
-                detect{|r| is_subhash(self.headers, headers)}
-            matched.handler.call(make_req_obj(request.body.read, headers['Content-Type']))
+                detect{|r| this.is_subhash(self.headers, headers)}
+            matched.handler.call(this.make_req_obj(request.body.read, self.request.env['CONTENT_TYPE']))
           end
         end
       end
     end
 
-    private
+    def teardown
+      base_uri_mapping.clear
+      Mimic.cleanup!
+    end
+
+    def remapped_base_uri(base_uri)
+      base_uri_mapping.fetch(base_uri) {|x|x}
+    end
+
+    def base_uri_mapping
+      @base_uri_mapping ||= {}
+    end
 
     def make_req_obj(raw_body, content_type)
-      Request.new(read(raw_body, format_for(content_type)))
+      body = raw_body.empty? ? '' : read(raw_body, format_for(content_type))
+      Request.new(body)
     end
 
     def is_subhash(hash, subhash)
-      subhash.each_pair.all{|k, v| hash[k] == v}
+      subhash.each_pair.all?{|k, v| hash[k] == v}
     end
 
     class Setup
@@ -52,9 +67,9 @@ class Hyperion
 
     Request = ImmutableStruct.new(:body)
   end
+  private
 
   def uri_base
-
+    self.class.remapped_base_uri(@uri_base)
   end
-
 end
