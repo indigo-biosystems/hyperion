@@ -3,7 +3,7 @@ class Hyperion
 
     def post_headers(format)
       {
-          'Content-Type' => content_type(format)
+          'Content-Type' => content_type_for(format)
       }
     end
 

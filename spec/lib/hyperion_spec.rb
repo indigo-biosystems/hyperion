@@ -6,7 +6,7 @@ describe Hyperion do
 
   describe '#get' do
     it 'performs a GET using Typhoeus' do
-      uri = double
+      uri = 'http://example.com:12345/hi/there'
       expected_opts = {
           method: :get,
           headers: {
@@ -24,7 +24,7 @@ describe Hyperion do
 
   describe '#post' do
     it 'performs a POST using Typhoeus' do
-      uri = double
+      uri = 'http://example.com:12345/hi/there'
       expected_opts = {
           method: :post,
           headers: {

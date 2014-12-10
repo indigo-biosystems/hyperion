@@ -1,3 +1,5 @@
+require 'hyperion/headers'
+
 class Hyperion
   describe Headers do
     include Headers
@@ -15,7 +17,7 @@ class Hyperion
     end
     describe '#content_type' do
       it 'returns the appropriate mime type for json' do
-        expect(content_type(:json)).to eql 'application/json'
+        expect(content_type_for(:json)).to eql 'application/json'
       end
     end
   end
