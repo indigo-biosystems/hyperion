@@ -23,15 +23,16 @@ class Hyperion
     end
 
     def run_fake_server(setup)
-      routes = setup.rules.map{|r| [r.method, r.path]}.uniq
+      routes = setup.rules.map { |r| [r.method, r.path] }.uniq
       this = self
       Mimic.mimic(port: @fake_port) do
         routes.each do |(method, path)|
           send(method, path) do
-            matched = setup.rules.
-                select{|r| r.method == method && r.path == path}.
-                detect{|r| this.send(:is_subhash, self.headers, headers)}
-            matched.handler.call(this.send(:make_req_obj, request.body.read, self.request.env['CONTENT_TYPE']))
+            path_matched = setup.rules.select { |r| r.method == method && r.path == path }
+            matched = path_matched.detect { |r|
+              this.send(:sinatrize_headers, r.headers).subhash?(request.env)
+            }
+            matched.handler.call(this.send(:make_req_obj, request.body.read, request.env['CONTENT_TYPE']))
           end
         end
       end
@@ -44,8 +45,22 @@ class Hyperion
 
     private
 
+    def sinatrize_headers(headers)
+      Hash[headers.map { |k, v| [sinatra_header(k), v] }]
+    end
+
+    def sinatra_header(header)
+      cased_header = header.upcase.gsub('-', '_')
+      case cased_header
+        when 'ACCEPT'; 'HTTP_ACCEPT'
+        when 'HOST'; 'HTTP_HOST'
+        when 'USER_AGENT'; 'HTTP_USER_AGENT'
+        else; cased_header
+      end
+    end
+
     def remapped_base_uri(base_uri)
-      base_uri_mapping.fetch(base_uri) {|x|x}
+      base_uri_mapping.fetch(base_uri) { |x| x }
     end
 
     def base_uri_mapping
@@ -58,7 +73,7 @@ class Hyperion
     end
 
     def is_subhash(hash, subhash)
-      subhash.each_pair.all?{|k, v| hash[k] == v}
+      subhash.each_pair.all? { |k, v| hash[k] == v }
     end
 
     class Setup
@@ -79,5 +94,11 @@ class Hyperion
 
   def uri_base
     self.class.send(:remapped_base_uri, @uri_base)
+  end
+end
+
+class Hash
+  def subhash?(hash)
+    each_pair.all? { |k, v| hash[k] == v }
   end
 end
