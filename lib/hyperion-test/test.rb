@@ -8,6 +8,8 @@ class Hyperion
     include Formats
     include Headers
 
+    # TODO: when doing remappings, print to stdout the remapping so users can be aware
+    # TODO: (e.g., "Mapping 'hello.com' to 'localhost:12345'")
     def fake(base_uri_with_port)
       unless @registered_hook
         RSpec.current_example.example_group.hooks.register(:prepend, :after, :each) do

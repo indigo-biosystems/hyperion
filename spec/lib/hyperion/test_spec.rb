@@ -88,7 +88,7 @@ describe Hyperion do
 
     it 'considers the domain to be part of the route'
     # TODO: i.e., 'hello.com' vs 'goodbye.com'; since we are wiping out the domain as part of using Mimic,
-    # TODO: we need to find a way to add the domain (and maybe protocol as below) to mimic.
+    # TODO: we need to find a way to add the domain [use ports] (and maybe protocol as below) to mimic.
     it 'considers the protocol to be part of the route' #TODO: should this actually be true?
 
     def create_fake_server(opts={}, &routes)
