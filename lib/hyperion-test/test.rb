@@ -9,6 +9,12 @@ class Hyperion
     include Headers
 
     def fake(base_uri_with_port)
+      unless @registered_hook
+        RSpec.current_example.example_group.hooks.register(:prepend, :after, :each) do
+          Hyperion.teardown
+        end
+        @registered_hook = true
+      end
       original_uri, @fake_port = split_uri(base_uri_with_port)
       base_uri_mapping[original_uri] = 'http://localhost'
       setup = Setup.new

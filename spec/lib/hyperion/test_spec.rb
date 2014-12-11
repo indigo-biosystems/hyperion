@@ -1,6 +1,7 @@
 require 'spec_helper'
 require 'hyperion-test/test'
 
+
 describe Hyperion do
   include Hyperion::Formats
 
@@ -12,9 +13,6 @@ describe Hyperion do
   # end
 
   shared_examples 'a web server' do
-    after :each do
-      Hyperion.teardown
-    end
     it 'implements specific routes' do
       Hyperion.send(type, 'http://yoursite.com:3000') do |svr|
         svr.allow(:get, '/users/0') do
@@ -37,6 +35,7 @@ describe Hyperion do
       expect(result.status).to eql Hyperion::Result::Status::SUCCESS
       expect(result.body).to eql({'greeting' => 'hello, freddy'})
     end
+
     it 'considers the HTTP method to be part of the route'
     it 'considers the path to be part of the route'
     it 'considers the headers to be part of the route'
@@ -54,3 +53,4 @@ describe Hyperion do
     end
   end
 end
+
