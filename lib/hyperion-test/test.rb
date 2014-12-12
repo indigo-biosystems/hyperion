@@ -11,17 +11,31 @@ class Hyperion
     # TODO: when doing remappings, print to stdout the remapping so users can be aware
     # TODO: (e.g., "Mapping 'hello.com' to 'localhost:12345'")
     def fake(base_uri_with_port)
-      unless @registered_hook
-        RSpec.current_example.example_group.hooks.register(:prepend, :after, :each) do
-          Hyperion.teardown
-        end
-        @registered_hook = true
+      unless teardown_registered?
+        rspec_hooks.register(:prepend, :after, :each, &(Hyperion.method(:teardown).to_proc))
       end
       original_uri, @fake_port = split_uri(base_uri_with_port)
       base_uri_mapping[original_uri] = 'http://localhost'
       setup = Setup.new
       yield setup
       run_fake_server(setup)
+    end
+
+    def teardown(*args)
+      base_uri_mapping.clear
+      Mimic.cleanup!
+    end
+
+    private
+
+    def teardown_registered?
+      rspec_hooks[:after][:example].to_a.any? do |hook|
+        hook.block.source_location == Hyperion.method(:teardown).to_proc.source_location
+      end
+    end
+
+    def rspec_hooks
+      RSpec.current_example.example_group.hooks
     end
 
     def run_fake_server(setup)
@@ -39,13 +53,6 @@ class Hyperion
         end
       end
     end
-
-    def teardown
-      base_uri_mapping.clear
-      Mimic.cleanup!
-    end
-
-    private
 
     def sinatrize_headers(headers)
       Hash[headers.map { |k, v| [sinatra_header(k), v] }]
