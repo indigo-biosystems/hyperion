@@ -11,7 +11,7 @@ class Hyperion
     # TODO: when doing remappings, print to stdout the remapping so users can be aware
     # TODO: (e.g., "Mapping 'hello.com' to 'localhost:12345'")
     def fake(base_uri_with_port)
-      unless teardown_registered?
+      if can_hook_teardown? && !teardown_registered?
         rspec_hooks.register(:prepend, :after, :each, &(Hyperion.method(:teardown).to_proc))
       end
       original_uri, @fake_port = split_uri(base_uri_with_port)
@@ -32,6 +32,10 @@ class Hyperion
       rspec_hooks[:after][:example].to_a.any? do |hook|
         hook.block.source_location == Hyperion.method(:teardown).to_proc.source_location
       end
+    end
+
+    def can_hook_teardown?
+      RSpec.current_example
     end
 
     def rspec_hooks
