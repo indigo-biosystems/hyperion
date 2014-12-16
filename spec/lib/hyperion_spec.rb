@@ -41,6 +41,20 @@ describe Hyperion do
     end
   end
 
+  describe '::request' do
+    it 'delegates to #request' do
+      method = :xyz
+      path, uri, response_params = 3.times.map{double}
+      route = RestRoute.new(method, path, uri, response_params)
+      hyp = double
+      arg1, arg2 = double, double
+      expect(Hyperion).to receive(:new).with(uri, response_params).and_return(hyp)
+      expect(hyp).to receive(method).with(arg1, arg2)
+
+      Hyperion.request(route, arg1, arg2)
+    end
+  end
+
   def mock_json_response(code, hash)
     r = double
     allow(r).to receive(:success?) { 200 <= code && code < 300 }

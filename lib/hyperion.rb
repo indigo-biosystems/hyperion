@@ -1,8 +1,8 @@
 require_relative './hyperion/util'
 require 'immutable_struct'
 # Hyperion::Util.require_recursive '.' #TODO: extract the requiring into utils or someplace
-require_relative './response_params'
-Dir.glob(File.join(File.dirname(__FILE__), "hyperion/**/*.rb")).each{|path| require_relative(path)}
+Dir.glob(File.join(File.dirname(__FILE__), '*.rb')).each{|path| require_relative(path)}
+Dir.glob(File.join(File.dirname(__FILE__), 'hyperion/**/*.rb')).each{|path| require_relative(path)}
 require 'typhoeus'
 require 'oj'
 
@@ -16,6 +16,10 @@ class Hyperion
 
   def self.post(uri, response_params, body, body_format)
     self.new(uri, response_params).post(body, body_format)
+  end
+
+  def self.request(route, *args)
+    self.new(route.uri, route.response_params).send(route.method, *args)
   end
 
   def initialize(uri, response_params)
