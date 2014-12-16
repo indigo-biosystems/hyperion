@@ -1,14 +1,13 @@
-require_relative './hyperion/util.rb'
+require_relative './hyperion/util'
 require 'immutable_struct'
 # Hyperion::Util.require_recursive '.' #TODO: extract the requiring into utils or someplace
+require_relative './response_params'
 Dir.glob(File.join(File.dirname(__FILE__), "hyperion/**/*.rb")).each{|path| require_relative(path)}
 require 'typhoeus'
 require 'oj'
 
 class Hyperion
   include Headers
-
-  ResponseParams = ImmutableStruct.new(:type, :version, :format)
 
   # TODO: possibly provide an "overload" that takes a base_uri and path separately
   def self.get(uri, response_params)
@@ -35,7 +34,7 @@ class Hyperion
   private
 
   def request(method, headers={}, body=nil)
-    all_headers = default_headers(@response_params.type, @response_params.version, @response_params.format).merge(headers)
+    all_headers = default_headers(@response_params).merge(headers)
     response = Typho.request(full_uri, method: method, headers: all_headers, body: body)
     make_result(response)
   end

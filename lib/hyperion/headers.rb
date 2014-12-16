@@ -7,9 +7,9 @@ class Hyperion
       }
     end
 
-    def default_headers(type, version, format)
+    def default_headers(response_params)
       {
-          'Accept' => "application/vnd.indigobio-ascent.#{type}-v#{version}+#{format}"
+          'Accept' => "application/vnd.indigobio-ascent.#{response_params.type}-v#{response_params.version}+#{response_params.format}"
       }
     end
 
@@ -26,6 +26,5 @@ class Hyperion
         else; raise "Unsupported content type: #{content_type}"
       end
     end
-
   end
 end

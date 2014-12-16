@@ -1,4 +1,6 @@
+require 'hyperion'
 require 'hyperion/headers'
+
 
 class Hyperion
   describe Headers do
@@ -11,7 +13,7 @@ class Hyperion
     end
     describe '#default_headers' do
       it 'specifies accept header' do
-        headers = default_headers('ttt', '999', :json)
+        headers = default_headers(ResponseParams.new('ttt', '999', :json))
         expect(headers['Accept']).to eql 'application/vnd.indigobio-ascent.ttt-v999+json'
       end
     end

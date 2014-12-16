@@ -5,15 +5,8 @@ require 'hyperion-test/test'
 describe Hyperion do
   include Hyperion::Formats
 
-  # Hyperion.fake(AppConfig.assaymatic_base_uri) do |svr|
-  #   svr.expect(:post, "/sites/#{AppConfig.site}/production_assay_configurations/promote", expected_headers) do |req|
-  #     expect(req.body['name']).to eql config.name
-  #     [200, {'Content-Type' => 'application/json'}, config.attributes.as_json.to_json]
-  #   end
-  # end
-
   shared_examples 'a web server' do
-    let(:user_response_params) { Hyperion::ResponseParams.new('user', 1, :json) }
+    let(:user_response_params) { ResponseParams.new('user', 1, :json) }
     it 'implements specific routes' do
       create_fake_server do |svr|
         svr.allow(:get, '/users/0') do
@@ -29,7 +22,7 @@ describe Hyperion do
       expect(result.status).to eql Hyperion::Result::Status::SUCCESS
       expect(result.body).to eql({'name' => 'freddy'})
 
-      response_params = Hyperion::ResponseParams.new('greeting', 1, :json)
+      response_params = ResponseParams.new('greeting', 1, :json)
       result = Hyperion.post('http://yoursite.com:3000/say_hello', response_params, write({'name' => 'freddy'}, :json), :json)
       expect(result.code).to eql 200
       expect(result.status).to eql Hyperion::Result::Status::SUCCESS
@@ -81,7 +74,7 @@ describe Hyperion do
       result = Hyperion.get('http://yoursite.com:3000/users/0', user_response_params)
       expect(result.body).to eql({'name' => 'freddy'})
 
-      full_user_response_params = Hyperion::ResponseParams.new('full_user', 1, :json)
+      full_user_response_params = ResponseParams.new('full_user', 1, :json)
       result = Hyperion.get('http://yoursite.com:3000/users/0', full_user_response_params)
       expect(result.body).to eql({'first_name' => 'freddy', 'last_name' => 'kruger', 'address' => 'Elm Street'})
     end
