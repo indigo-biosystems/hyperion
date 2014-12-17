@@ -23,6 +23,9 @@ class Hyperion
 
     def teardown(*args)
       base_uri_mapping.clear
+      routes.clear
+      rules.clear
+      @mimic_running = false
       Mimic.cleanup!
     end
 
@@ -43,12 +46,14 @@ class Hyperion
     end
 
     def run_fake_server(setup)
-      routes = setup.rules.map { |r| [r.method, r.path] }.uniq
+      routes.concat(setup.rules.map { |r| [r.method, r.path] }.uniq)
+      rules.concat(setup.rules)
       this = self
+      Mimic.cleanup! if @mimic_running
       Mimic.mimic(port: @fake_port) do
-        routes.each do |(method, path)|
+        this.send(:routes).each do |(method, path)|
           send(method, path) do
-            path_matched = setup.rules.select { |r| r.method == method && r.path == path }
+            path_matched = this.send(:rules).select { |r| r.method == method && r.path == path }
             matched = path_matched.detect { |r|
               this.send(:sinatrize_headers, r.headers).subhash?(request.env)
             }
@@ -56,6 +61,7 @@ class Hyperion
           end
         end
       end
+      @mimic_running = true
     end
 
     def sinatrize_headers(headers)
@@ -78,6 +84,14 @@ class Hyperion
 
     def base_uri_mapping
       @base_uri_mapping ||= {}
+    end
+
+    def routes
+      @routes ||= []
+    end
+
+    def rules
+      @rules ||= []
     end
 
     def make_req_obj(raw_body, content_type)

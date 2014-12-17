@@ -15,7 +15,7 @@ describe Hyperion do
           body: nil
       }
       expect(Hyperion::Typho).to receive(:request).with(uri, expected_opts) { mock_json_response(200, {'a' => 1}) }
-      result = Hyperion.new(uri, Hyperion::ResponseParams.new('ttt', 999, :json)).get
+      result = Hyperion.new(uri, ResponseParams.new('ttt', 999, :json)).get
       expect(result.status).to eql Hyperion::Result::Status::SUCCESS
       expect(result.code).to eql 200
       expect(result.body).to eql({'a' => 1})
@@ -34,7 +34,7 @@ describe Hyperion do
           body: '{"info":888}'
       }
       expect(Hyperion::Typho).to receive(:request).with(uri, expected_opts) { mock_json_response(200, {'a' => 1}) }
-      result = Hyperion.new(uri, Hyperion::ResponseParams.new('ttt', 999, :json)).post(Oj.dump({'info' => 888}), :json)
+      result = Hyperion.new(uri, ResponseParams.new('ttt', 999, :json)).post(Oj.dump({'info' => 888}), :json)
       expect(result.status).to eql Hyperion::Result::Status::SUCCESS
       expect(result.code).to eql 200
       expect(result.body).to eql({'a' => 1})

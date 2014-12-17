@@ -79,10 +79,29 @@ describe Hyperion do
       expect(result.body).to eql({'first_name' => 'freddy', 'last_name' => 'kruger', 'address' => 'Elm Street'})
     end
 
-    it 'considers the domain to be part of the route'
-    # TODO: i.e., 'hello.com' vs 'goodbye.com'; since we are wiping out the domain as part of using Mimic,
-    # TODO: we need to find a way to add the domain [use ports] (and maybe protocol as below) to mimic.
-    it 'considers the protocol to be part of the route' #TODO: should this actually be true?
+    it 'allows multiple fake servers to be created' do # prereq for multiple domains, consider deleting this test when multiple domains is implemented
+      create_fake_server do |svr|
+        svr.allow(:get, '/users/0') do
+          success_response({'name' => 'freddy'})
+        end
+      end
+      create_fake_server do |svr|
+        svr.allow(:get, '/users/1') do
+          success_response({'name' => 'annie'})
+        end
+      end
+
+      result = Hyperion.get('http://yoursite.com:3000/users/0', user_response_params)
+      expect(result.body).to eql({'name' => 'freddy'})
+
+      result = Hyperion.get('http://yoursite.com:3000/users/1', user_response_params)
+      expect(result.body).to eql({'name' => 'annie'})
+    end
+
+    # it 'considers the domain to be part of the route'
+    # # TODO: i.e., 'hello.com' vs 'goodbye.com'; since we are wiping out the domain as part of using Mimic,
+    # # TODO: we need to find a way to add the domain [use ports] (and maybe protocol as below) to mimic.
+    # it 'considers the protocol to be part of the route' #TODO: should this actually be true?
 
     def create_fake_server(opts={}, &routes)
       base_uri = "#{opts[:proto] || 'http'}://#{opts[:domain] || 'yoursite.com'}:#{opts[:port] || 3000}"
