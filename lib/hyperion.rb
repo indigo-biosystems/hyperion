@@ -1,4 +1,3 @@
-require_relative './hyperion/util'
 require 'immutable_struct'
 # Hyperion::Util.require_recursive '.' #TODO: extract the requiring into utils or someplace
 Dir.glob(File.join(File.dirname(__FILE__), '*.rb')).each{|path| require_relative(path)}
