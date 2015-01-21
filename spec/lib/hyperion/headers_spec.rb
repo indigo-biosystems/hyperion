@@ -11,6 +11,12 @@ class Hyperion
         expect(headers['Content-Type']).to eql 'application/json'
       end
     end
+    describe '#put_headers' do
+      it 'specifies content type' do
+        headers = put_headers(:json)
+        expect(headers['Content-Type']).to eql 'application/json'
+      end
+    end
     describe '#default_headers' do
       it 'specifies accept header' do
         headers = default_headers(ResponseParams.new('ttt', '999', :json))

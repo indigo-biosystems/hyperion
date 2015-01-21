@@ -30,8 +30,16 @@ class Hyperion
     request(:get)
   end
 
+  def delete
+    request(:delete)
+  end
+
   def post(body, body_format)
     request(:post, post_headers(body_format), body)
+  end
+
+  def put(body, body_format)
+    request(:put, put_headers(body_format), body)
   end
 
   private

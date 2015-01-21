@@ -7,6 +7,10 @@ class Hyperion
       }
     end
 
+    def put_headers(format)
+      post_headers(format)
+    end
+
     def default_headers(response_params)
       {
           'Accept' => "application/vnd.indigobio-ascent.#{response_params.type}-v#{response_params.version}+#{response_params.format}"
