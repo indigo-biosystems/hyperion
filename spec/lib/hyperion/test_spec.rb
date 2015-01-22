@@ -6,31 +6,32 @@ describe Hyperion do
   include Hyperion::Formats
 
   shared_examples 'a web server' do
-    let(:user_response_params) { ResponseParams.new('user', 1, :json) }
+    let(:user_response_params) { ResponseDescriptor.new('user', 1, :json) }
+
     it 'implements specific routes' do
-      create_fake_server do |svr|
-        svr.allow(:get, '/users/0') do
+      get_user_route = RestRoute.new(:get, 'http://somesite.org/users/0', user_response_params)
+      post_greeting_route = RestRoute.new(:post, 'http://somesite.org/say_hello',
+                                          ResponseDescriptor.new('greeting', 1, :json),
+                                          PayloadDescriptor.new(:json))
+
+      Hyperion.send(hyp_method, 'http://somesite.org') do |svr|
+        svr.allow(get_user_route) do
           success_response({'name' => 'freddy'})
         end
-        svr.allow(RestRoute.new(:post, 'http://somesite/say_hello', ResponseParams.new('greeting', 1, :json))) do |req|
+        svr.allow(post_greeting_route) do |req|
           success_response({'greeting' => "hello, #{req.body['name']}"})
         end
       end
 
-      result = Hyperion.get('http://yoursite.com:3000/users/0', user_response_params)
-      expect(result.code).to eql 200
-      expect(result.status).to eql Hyperion::Result::Status::SUCCESS
-      expect(result.body).to eql({'name' => 'freddy'})
+      result = Hyperion.request(get_user_route)
+      expect_success(result, {'name' => 'freddy'})
 
-      response_params = ResponseParams.new('greeting', 1, :json)
-      result = Hyperion.post('http://yoursite.com:3000/say_hello', response_params, write({'name' => 'freddy'}, :json), :json)
-      expect(result.code).to eql 200
-      expect(result.status).to eql Hyperion::Result::Status::SUCCESS
-      expect(result.body).to eql({'greeting' => 'hello, freddy'})
+      result = Hyperion.request(post_greeting_route, write({'name' => 'freddy'}, :json))
+      expect_success(result, {'greeting' => 'hello, freddy'})
     end
 
     it 'considers the HTTP method to be part of the route' do
-      create_fake_server do |svr|
+      Hyperion.send(hyp_method, 'http://somesite.org') do |svr|
         svr.allow(:get, '/users/0') do
           success_response({'name' => 'freddy'})
         end
@@ -38,15 +39,18 @@ describe Hyperion do
           success_response({'updated' => {'name' => req.body['name']}})
         end
       end
-      result = Hyperion.get('http://yoursite.com:3000/users/0', user_response_params)
+
+      result = Hyperion.request(RestRoute.new(:get, 'http://somesite.org/users/0', user_response_params))
       expect(result.body).to eql({'name' => 'freddy'})
 
-      result = Hyperion.post('http://yoursite.com:3000/users/0', user_response_params, write({'name' => 'annie'}, :json), :json)
+      result = Hyperion.request(RestRoute.new(:post, 'http://somesite.org/users/0',
+                                              user_response_params, PayloadDescriptor.new(:json)),
+                                write({'name' => 'annie'}, :json))
       expect(result.body).to eql({'updated' => {'name' => 'annie'}})
     end
 
     it 'considers the path to be part of the route' do
-      create_fake_server do |svr|
+      Hyperion.send(hyp_method, 'http://somesite.org') do |svr|
         svr.allow(:get, '/users/0') do
           success_response({'name' => 'freddy'})
         end
@@ -55,15 +59,15 @@ describe Hyperion do
         end
       end
 
-      result = Hyperion.get('http://yoursite.com:3000/users/0', user_response_params)
+      result = Hyperion.request(RestRoute.new(:get, 'http://somesite.org/users/0', user_response_params))
       expect(result.body).to eql({'name' => 'freddy'})
 
-      result = Hyperion.get('http://yoursite.com:3000/users/1', user_response_params)
+      result = Hyperion.request(RestRoute.new(:get, 'http://somesite.org/users/1', user_response_params))
       expect(result.body).to eql({'name' => 'annie'})
     end
 
     it 'considers the headers to be part of the route' do
-      create_fake_server do |svr|
+      Hyperion.send(hyp_method, 'http://somesite.org') do |svr|
         svr.allow(:get, '/users/0', {'Accept' => 'application/vnd.indigobio-ascent.user-v1+json'}) do
           success_response({'name' => 'freddy'})
         end
@@ -71,57 +75,93 @@ describe Hyperion do
           success_response({'first_name' => 'freddy', 'last_name' => 'kruger', 'address' => 'Elm Street'})
         end
       end
-      result = Hyperion.get('http://yoursite.com:3000/users/0', user_response_params)
+
+      result = Hyperion.request(RestRoute.new(:get, 'http://somesite.org/users/0', user_response_params))
       expect(result.body).to eql({'name' => 'freddy'})
 
-      full_user_response_params = ResponseParams.new('full_user', 1, :json)
-      result = Hyperion.get('http://yoursite.com:3000/users/0', full_user_response_params)
+      full_user_response_params = ResponseDescriptor.new('full_user', 1, :json)
+      result = Hyperion.request(RestRoute.new(:get, 'http://somesite.org/users/0', full_user_response_params))
       expect(result.body).to eql({'first_name' => 'freddy', 'last_name' => 'kruger', 'address' => 'Elm Street'})
     end
 
-    it 'allows multiple fake servers to be created' do # prereq for multiple domains, consider deleting this test when multiple domains is implemented
-      create_fake_server do |svr|
-        svr.allow(:get, '/users/0') do
-          success_response({'name' => 'freddy'})
-        end
-      end
-      create_fake_server do |svr|
-        svr.allow(:get, '/users/1') do
-          success_response({'name' => 'annie'})
-        end
+    it 'allows multiple fake servers to be created' do
+      Hyperion.send(hyp_method, 'http://google.com') do |svr|
+        svr.allow(:get, '/welcome') { success_response({'text' => 'hello from google'}) }
       end
 
-      result = Hyperion.get('http://yoursite.com:3000/users/0', user_response_params)
-      expect(result.body).to eql({'name' => 'freddy'})
+      Hyperion.send(hyp_method, 'http://indigo.com:3000') do |svr|
+        svr.allow(:get, '/welcome') { success_response({'text' => 'hello from indigo@3000'}) }
+      end
 
-      result = Hyperion.get('http://yoursite.com:3000/users/1', user_response_params)
-      expect(result.body).to eql({'name' => 'annie'})
+      Hyperion.send(hyp_method, 'http://indigo.com:4000') do |svr|
+        svr.allow(:get, '/welcome') { success_response({'text' => 'hello from indigo@4000'}) }
+      end
+
+      result = Hyperion.request(RestRoute.new(:get, 'http://google.com/welcome', user_response_params))
+      expect(result.body).to eql({'text' => 'hello from google'})
+
+      result = Hyperion.request(RestRoute.new(:get, 'http://indigo.com:3000/welcome', user_response_params))
+      expect(result.body).to eql({'text' => 'hello from indigo@3000'})
+
+      result = Hyperion.request(RestRoute.new(:get, 'http://indigo.com:4000/welcome', user_response_params))
+      expect(result.body).to eql({'text' => 'hello from indigo@4000'})
     end
 
-    # it 'considers the domain to be part of the route'
-    # # TODO: i.e., 'hello.com' vs 'goodbye.com'; since we are wiping out the domain as part of using Mimic,
-    # # TODO: we need to find a way to add the domain [use ports] (and maybe protocol as below) to mimic.
-    # it 'considers the protocol to be part of the route' #TODO: should this actually be true?
+    it 'allows routes to be augmented' do
+      Hyperion.send(hyp_method, 'http://google.com') do |svr|
+        svr.allow(:get, '/old') { success_response({'text' => 'old'}) }
+        svr.allow(:get, '/hello') { success_response({'text' => 'hello'}) }
+        svr.allow(RestRoute.new(:get, '/users/0', user_response_params)) { success_response({'user' => 'old user'}) }
+      end
 
-    def create_fake_server(opts={}, &routes)
-      base_uri = "#{opts[:proto] || 'http'}://#{opts[:domain] || 'yoursite.com'}:#{opts[:port] || 3000}"
-      Hyperion.send(type, base_uri, &routes)
+      # smoke test that the server is up and running
+      result = Hyperion.request(RestRoute.new(:get, 'http://google.com/hello', user_response_params))
+      expect(result.body).to eql({'text' => 'hello'})
+
+      # augment the routes
+      Hyperion.send(hyp_method, 'http://google.com') do |svr|
+        svr.allow(:get, '/hello') { success_response({'text' => 'aloha'}) }
+        svr.allow(:get, '/goodbye') { success_response({'text' => 'goodbye'}) }
+        svr.allow(RestRoute.new(:get, '/users/0', user_response_params)) { success_response({'user' => 'new user'}) }
+      end
+
+      # untouched routes are left alone
+      result = Hyperion.request(RestRoute.new(:get, 'http://google.com/old', user_response_params))
+      expect(result.body).to eql({'text' => 'old'})
+
+      # restating the route replaces it (last one wins)
+      result = Hyperion.request(RestRoute.new(:get, 'http://google.com/hello', user_response_params))
+      expect(result.body).to eql({'text' => 'aloha'})
+
+      # new routes can be added
+      result = Hyperion.request(RestRoute.new(:get, 'http://google.com/goodbye', user_response_params))
+      expect(result.body).to eql({'text' => 'goodbye'})
+
+      # restating a route routes that uses headers to differentiate replaces it (last one wins)
+      result = Hyperion.request(RestRoute.new(:get, 'http://google.com/users/0', user_response_params))
+      expect(result.body).to eql({'user' => 'new user'})
     end
 
     def success_response(body)
       [200, {'Content-Type' => 'application/json'}, write(body, :json)]
     end
+
+    def expect_success(result, body)
+      expect(result.status).to eql HyperionResult::Status::SUCCESS
+      expect(result.code).to eql 200
+      expect(result.body).to eql body
+    end
   end
 
   # describe '::stub' do
   #   it_behaves_like 'a web server' do
-  #     let(:type) { :stub }
+  #     let(:hyp_method) { :stub }
   #   end
   # end
 
   describe '::fake' do
     it_behaves_like 'a web server' do
-      let(:type) { :fake }
+      let(:hyp_method) { :fake }
     end
   end
 end

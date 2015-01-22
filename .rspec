@@ -1,3 +1,4 @@
 --format progress
 -I spec/lib
 --require 'support/core_helpers.rb'
+--color

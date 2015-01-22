@@ -1,34 +1,30 @@
 class Hyperion
   module Headers
 
-    def post_headers(format)
-      {
-          'Content-Type' => content_type_for(format)
-      }
+    def route_headers(route)
+      headers = {}
+      rd = route.response_descriptor
+      pd = route.payload_descriptor
+      headers['Accept'] = "application/vnd.indigobio-ascent.#{rd.type}-v#{rd.version}+#{rd.format}"
+      if pd
+        headers['Content-Type'] = content_type_for(pd.format)
+      end
+      headers
     end
 
-    def put_headers(format)
-      post_headers(format)
-    end
-
-    def default_headers(response_params)
-      {
-          'Accept' => "application/vnd.indigobio-ascent.#{response_params.type}-v#{response_params.version}+#{response_params.format}"
-      }
-    end
+    ContentTypes = [[:json, 'application/json'],
+                    [:protobuf, 'application/x-protobuf']]
 
     def content_type_for(format)
-      case format
-        when :json; 'application/json'
-        else; raise "Unsupported format: #{format}"
-      end
+      ct = ContentTypes.detect{|x| x.first == format}
+      raise "Unsupported format: #{format}" unless ct
+      ct.last
     end
 
     def format_for(content_type)
-      case content_type
-        when 'application/json'; :json
-        else; raise "Unsupported content type: #{content_type}"
-      end
+      ct = ContentTypes.detect{|x| x.last == content_type}
+      raise "Unsupported content type: #{content_type}" unless ct
+      ct.first
     end
   end
 end

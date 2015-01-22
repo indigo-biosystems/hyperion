@@ -7,89 +7,50 @@ require 'oj'
 
 class Hyperion
   include Headers
+  include Formats
 
-  # TODO: possibly provide an "overload" that takes a base_uri and path separately
-  def self.get(uri, response_params)
-    self.new(uri, response_params).get
-  end
-
-  def self.post(uri, response_params, body, body_format)
-    self.new(uri, response_params).post(body, body_format)
-  end
-
+  # for PUT and POST, args is (body, body_format)
+  # for GET and DELETE, args is meaningless
   def self.request(route, *args)
-    self.new(route.uri, route.response_params).send(route.method, *args)
+    self.new(route).request(*args)
   end
 
-  def initialize(uri, response_params)
-    @uri_base, @port, @path = split_uri(uri)
-    @response_params = response_params
+  def initialize(route)
+    @route = route
   end
 
-  def get
-    request(:get)
-  end
-
-  def delete
-    request(:delete)
-  end
-
-  def post(body, body_format)
-    request(:post, post_headers(body_format), body)
-  end
-
-  def put(body, body_format)
-    request(:put, put_headers(body_format), body)
-  end
-
-  private
-
-  def request(method, headers={}, body=nil)
-    all_headers = default_headers(@response_params).merge(headers)
-    response = Typho.request(full_uri, method: method, headers: all_headers, body: body)
+  # @param body [String] the body to send with POST or PUT
+  def request(body=nil, additional_headers={})
+    all_headers = route_headers(route).merge(additional_headers)
+    response = Typho.request(transform_uri(route.uri).to_s, method: route.method, headers: all_headers, body: body)
     make_result(response)
   end
 
-  def full_uri
-    File.join("#{uri_base}:#{@port}", @path)
+
+  private
+
+  def route
+    @route
   end
 
-  # let Hyperion::Test pass us a fake one
-  def uri_base
-    @uri_base
-  end
-
-  def split_uri(uri)
-    self.class.split_uri(uri)
-  end
-
-  def self.split_uri(uri)
-    m = uri.match(%r{(?<uri_base>(?<proto>https?)://[^:/]+)(?::(?<port>\d+))?(?<path>/.*)?})
-    [m[:uri_base], m[:port] || default_port(m[:proto]), m[:path] || '/']
-  end
-
-  def self.default_port(proto)
-    case proto
-      when 'http'; 80
-      when 'https'; 443
-      else; "Unexpected proto: #{proto}"
-    end
+  def transform_uri(uri)
+    Hyperion.send(:transform_uri, uri)
   end
 
   # give Hyperion::Test a shot at changing the uri for stubbing purposes
-  def transform_uri(uri)
+  def self.transform_uri(uri)
     uri
   end
 
   def make_result(t)
     if t.success?
-      Result.new(Result::Status::SUCCESS, t.code, Oj.load(t.body))
+      HyperionResult.new(HyperionResult::Status::SUCCESS, t.code, read(t.body, :json))
     elsif t.timed_out?
-      Result.new(Result::Status::TIMED_OUT)
+      HyperionResult.new(HyperionResult::Status::TIMED_OUT)
     elsif t.code == 0
-      Result.new(Result::Status::NO_RESPONSE)
+      HyperionResult.new(HyperionResult::Status::NO_RESPONSE)
     else
-      Result.new(Result::Status::CHECK_CODE, t.code, Oj.load(t.body))
+      HyperionResult.new(HyperionResult::Status::CHECK_CODE, t.code, read(t.body, :json))
     end
   end
 
