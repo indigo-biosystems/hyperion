@@ -104,6 +104,8 @@ class Hyperion
     end
 
     class Setup
+      include Hyperion::Headers
+
       def rules
         @rules ||= []
       end

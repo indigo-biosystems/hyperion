@@ -12,7 +12,7 @@ describe Hyperion do
         svr.allow(:get, '/users/0') do
           success_response({'name' => 'freddy'})
         end
-        svr.allow(:post, '/say_hello') do |req|
+        svr.allow(RestRoute.new(:post, 'http://somesite/say_hello', ResponseParams.new('greeting', 1, :json))) do |req|
           success_response({'greeting' => "hello, #{req.body['name']}"})
         end
       end
