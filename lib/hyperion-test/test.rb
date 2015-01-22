@@ -108,8 +108,17 @@ class Hyperion
         @rules ||= []
       end
 
-      def allow(method, path, headers={}, &handler)
-        rules << Rule.new(method, path, headers, handler)
+      # allow(route)
+      # allow(method, path, headers={})
+      def allow(*args, &handler)
+        if args.size == 1 && args.first.is_a?(RestRoute)
+          route = args.first
+          rules << Rule.new(route.method, route.uri.path, default_headers(route.response_params), handler)
+        else
+          method, path, headers = args
+          headers ||= {}
+          rules << Rule.new(method, path, headers, handler)
+        end
       end
     end
 

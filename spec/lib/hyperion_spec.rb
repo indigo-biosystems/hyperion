@@ -77,8 +77,8 @@ describe Hyperion do
   describe '::request' do
     it 'delegates to #request' do
       method = :xyz
-      path, uri, response_params = 3.times.map{double}
-      route = RestRoute.new(method, path, uri, response_params)
+      uri, response_params = 2.times.map{double}
+      route = RestRoute.new(method, uri, response_params)
       hyp = double
       arg1, arg2 = double, double
       expect(Hyperion).to receive(:new).with(uri, response_params).and_return(hyp)
