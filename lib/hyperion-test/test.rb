@@ -11,8 +11,6 @@ class Hyperion
     include Headers
     include TestFrameworkHooks
 
-    # TODO: when doing remappings, print to stdout the remapping so users can be aware
-    # TODO: (e.g., "Mapping 'hello.com' to 'localhost:12345'")
     def fake(base_uri, &routes)
       if !@running
         hook_teardown if can_hook_teardown? && !teardown_registered?
@@ -21,7 +19,7 @@ class Hyperion
       servers[base_uri].configure(&routes)
     end
 
-    def teardown(*dummy)
+    def teardown
       servers.values.each{|s| s.teardown}
       servers.clear
       @running = false
@@ -43,7 +41,13 @@ class Hyperion
     # redirect normal Hyperion requests to the appropriate fake server
     def transform_uri(uri)
       server_uri = servers.keys.detect{|server_uri| base_matches?(URI(server_uri), uri)}
-      server_uri ? change_base(URI(uri), URI("http://localhost:#{servers[server_uri].port}")) : uri
+      if server_uri
+        new_uri = change_base(URI(uri), URI("http://localhost:#{servers[server_uri].port}"))
+        puts "Hyperion redirected #{uri}  ==>  #{new_uri}"
+        new_uri
+      else
+        uri
+      end
     end
 
     def base_matches?(a, b)
