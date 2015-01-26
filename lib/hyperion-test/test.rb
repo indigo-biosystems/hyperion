@@ -40,9 +40,9 @@ class Hyperion
 
     # redirect normal Hyperion requests to the appropriate fake server
     def transform_uri(uri)
-      server_uri = servers.keys.detect{|server_uri| base_matches?(URI(server_uri), uri)}
+      server_uri = servers.keys.detect{|server_uri| URI(server_uri).base == uri.base}
       if server_uri
-        new_uri = change_base(URI(uri), URI("http://localhost:#{servers[server_uri].port}"))
+        new_uri = URI(uri).change_base(URI("http://localhost:#{servers[server_uri].port}"))
         puts "Hyperion redirected #{uri}  ==>  #{new_uri}"
         new_uri
       else
@@ -50,16 +50,5 @@ class Hyperion
       end
     end
 
-    def base_matches?(a, b)
-      a.scheme == b.scheme && a.host == b.host && a.port == b.port
-    end
-
-    def change_base(target_uri, source_uri)
-      uri = target_uri.dup
-      uri.scheme = source_uri.scheme
-      uri.host = source_uri.host
-      uri.port = source_uri.port
-      uri
-    end
   end
 end

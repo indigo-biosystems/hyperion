@@ -27,6 +27,8 @@ class RestRoute
 
   # @param method [Symbol] the HTTP method
   # @param uri [String, URI]
+  # @param response_descriptor [ResponseDescriptor]
+  # @param payload_descriptor [PayloadDescriptor]
   def initialize(method, uri, response_descriptor, payload_descriptor=nil)
     @method = method
     @uri = URI(uri)
@@ -35,7 +37,18 @@ class RestRoute
   end
 end
 
-class HyperionResult < ImmutableStruct.new(:status, :code, :body)
+class HyperionResult
+  attr_reader :status, :code, :body
+
+  # @param status [HyperionResult::Status]
+  # @param code [Integer] the HTTP response code
+  # @param body [Object, Hash<String,Object>] the deserialized response body.
+  #   The type is determined by the content-type.
+  #   JSON is deserialized to a Hash<String, Object>
+  def initialize(status, code, body)
+    @status, @code, @body = status, code, body
+  end
+
   module Status
     include Enum
     TIMED_OUT = 'timed_out'
