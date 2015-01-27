@@ -30,7 +30,10 @@ class Hyperion
   # @private
   def request(body=nil, additional_headers={})
     all_headers = route_headers(route).merge(additional_headers)
-    typho_result = Typho.request(transform_uri(route.uri).to_s, method: route.method, headers: all_headers, body: body)
+    typho_result = Typho.request(transform_uri(route.uri).to_s,
+                                 method: route.method,
+                                 headers: all_headers,
+                                 body: body && write(body, route.payload_descriptor.format))
 
     if block_given?
       callcc do |cont|
@@ -58,14 +61,15 @@ class Hyperion
 
   def make_result(typho_result, continuation=nil)
     make = ->klass do
+      read_body = ->{read(typho_result.body, route.response_descriptor.format)}
       if typho_result.success?
-        klass.new(HyperionResult::Status::SUCCESS, typho_result.code, read(typho_result.body, :json))
+        klass.new(HyperionResult::Status::SUCCESS, typho_result.code, read_body.call)
       elsif typho_result.timed_out?
         klass.new(HyperionResult::Status::TIMED_OUT)
       elsif typho_result.code == 0
         klass.new(HyperionResult::Status::NO_RESPONSE)
       else
-        klass.new(HyperionResult::Status::CHECK_CODE, typho_result.code, read(typho_result.body, :json))
+        klass.new(HyperionResult::Status::CHECK_CODE, typho_result.code, read_body.call)
       end
     end
 

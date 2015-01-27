@@ -3,8 +3,10 @@ require 'oj'
 class Hyperion
   module Formats
     def write(obj, format)
+      return obj if obj.is_a?(String)
       case format
         when :json; Oj.dump(obj)
+        when :protobuf; obj
         else; raise "Unsupported format: #{format}"
       end
     end
@@ -13,6 +15,7 @@ class Hyperion
       return nil if bytes.nil?
       case format
         when :json; read_json(bytes)
+        when :protobuf; bytes
         else; raise "Unsupported format: #{format}"
       end
     end

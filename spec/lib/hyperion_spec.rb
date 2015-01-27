@@ -32,6 +32,29 @@ describe Hyperion do
       expect(result.body).to eql({'foo' => 'bar'})
     end
 
+    context 'serialization' do
+      let!(:method){:post}
+      let!(:uri){'http://somesite.org:5000/path/to/resource'}
+      let!(:rd){ResponseDescriptor.new('data_type', 1, :json)}
+      let!(:pd){PayloadDescriptor.new(:json)}
+      let!(:route){RestRoute.new(method, uri, rd, pd)}
+      let!(:expected_headers){{
+          'Accept' => "application/vnd.indigobio-ascent.#{rd.type}-v#{rd.version}+#{rd.format}",
+          'Content-Type' => 'application/json'
+      }}
+      it 'deserializes the response' do
+        allow(Hyperion::Typho).to receive(:request).and_return(make_typho_response(200, '{"a":"b"}'))
+        result = Hyperion.request(route)
+        expect(result.body).to eql({'a' => 'b'})
+      end
+      it 'serializes the payload' do
+        expect(Hyperion::Typho).to receive(:request).
+                                       with(uri, {method: method, headers: expected_headers, body: '{"c":"d"}'}).
+                                       and_return(make_typho_response(200, write({}, :json)))
+        Hyperion.request(route, {'c' => 'd'})
+      end
+    end
+
     context 'when a block is provided' do
       let!(:route){RestRoute.new(:get, 'http://yum.com', ResponseDescriptor.new('x', 1, :json))}
       it 'calls the block with the result' do
