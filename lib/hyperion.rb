@@ -4,6 +4,7 @@ Dir.glob(File.join(File.dirname(__FILE__), '*.rb')).each{|path| require_relative
 Dir.glob(File.join(File.dirname(__FILE__), 'hyperion/**/*.rb')).each{|path| require_relative(path)}
 require 'typhoeus'
 require 'oj'
+require 'continuation'
 
 class Hyperion
   include Headers
@@ -13,8 +14,12 @@ class Hyperion
   # @param body [String] the body to send with POST or PUT
   # @param additional_headers [Hash] headers to send in addition to the ones
   #   already determined by the route. Example: +{'User-Agent' => 'Mozilla/5.0'}+
-  def self.request(route, body=nil, additional_headers={})
-    self.new(route).request(body, additional_headers)
+  # @yield [result] yields the result if a block is provided
+  # @yieldparam [HyperionResult]
+  # @return [HyperionResult, Object] If a block is provided, returns the block's
+  #   return value; otherwise, returns the result.
+  def self.request(route, body=nil, additional_headers={}, &block)
+    self.new(route).request(body, additional_headers, &block)
   end
 
   # @private
@@ -25,8 +30,15 @@ class Hyperion
   # @private
   def request(body=nil, additional_headers={})
     all_headers = route_headers(route).merge(additional_headers)
-    response = Typho.request(transform_uri(route.uri).to_s, method: route.method, headers: all_headers, body: body)
-    make_result(response)
+    typho_result = Typho.request(transform_uri(route.uri).to_s, method: route.method, headers: all_headers, body: body)
+
+    if block_given?
+      callcc do |cont|
+        yield make_result(typho_result, cont)
+      end
+    else
+      make_result(typho_result)
+    end
   end
 
   private
@@ -44,15 +56,55 @@ class Hyperion
     uri
   end
 
-  def make_result(t)
-    if t.success?
-      HyperionResult.new(HyperionResult::Status::SUCCESS, t.code, read(t.body, :json))
-    elsif t.timed_out?
-      HyperionResult.new(HyperionResult::Status::TIMED_OUT)
-    elsif t.code == 0
-      HyperionResult.new(HyperionResult::Status::NO_RESPONSE)
+  def make_result(typho_result, continuation=nil)
+    make = ->klass do
+      if typho_result.success?
+        klass.new(HyperionResult::Status::SUCCESS, typho_result.code, read(typho_result.body, :json))
+      elsif typho_result.timed_out?
+        klass.new(HyperionResult::Status::TIMED_OUT)
+      elsif typho_result.code == 0
+        klass.new(HyperionResult::Status::NO_RESPONSE)
+      else
+        klass.new(HyperionResult::Status::CHECK_CODE, typho_result.code, read(typho_result.body, :json))
+      end
+    end
+
+    if continuation
+      result = make.call(PredicatingHyperionResult)
+      result.instance_variable_set(:@continuation, continuation)
+      result
     else
-      HyperionResult.new(HyperionResult::Status::CHECK_CODE, t.code, read(t.body, :json))
+      make.call(HyperionResult)
+    end
+  end
+
+  # @private
+  class PredicatingHyperionResult < HyperionResult
+    def when(condition, &action)
+      if as_predicate(condition).call(self)
+        @continuation.call(action.call)
+      end
+      nil
+    end
+
+    private
+
+    def as_predicate(condition)
+      if Status.values.include?(condition)
+        status_checker(condition)
+      elsif condition.is_a?(Integer)
+        code_checker(condition)
+      elsif condition.respond_to?(:call)
+        condition
+      end
+    end
+
+    def status_checker(status)
+      ->r{r.status == status}
+    end
+
+    def code_checker(code)
+      ->r{r.code == code}
     end
   end
 

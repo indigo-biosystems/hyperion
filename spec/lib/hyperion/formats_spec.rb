@@ -11,6 +11,9 @@ class Hyperion
     end
 
     describe '#read' do
+      it 'returns nil if input is nil' do
+        expect(read(nil, :json)).to be_nil
+      end
       it 'read json' do
         expect(read('{"a":1}', :json)).to eql({'a' => 1})
       end

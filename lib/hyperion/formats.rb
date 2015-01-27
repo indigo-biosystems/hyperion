@@ -10,6 +10,7 @@ class Hyperion
     end
 
     def read(bytes, format)
+      return nil if bytes.nil?
       case format
         when :json; read_json(bytes)
         else; raise "Unsupported format: #{format}"

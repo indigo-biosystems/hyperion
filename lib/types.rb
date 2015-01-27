@@ -40,20 +40,20 @@ end
 class HyperionResult
   attr_reader :status, :code, :body
 
-  # @param status [HyperionResult::Status]
-  # @param code [Integer] the HTTP response code
-  # @param body [Object, Hash<String,Object>] the deserialized response body.
-  #   The type is determined by the content-type.
-  #   JSON is deserialized to a Hash<String, Object>
-  def initialize(status, code, body)
-    @status, @code, @body = status, code, body
-  end
-
   module Status
     include Enum
     TIMED_OUT = 'timed_out'
     NO_RESPONSE = 'no_response'
     CHECK_CODE = 'check_code'
     SUCCESS = 'success'
+  end
+
+  # @param status [HyperionResult::Status]
+  # @param code [Integer] the HTTP response code
+  # @param body [Object, Hash<String,Object>] the deserialized response body.
+  #   The type is determined by the content-type.
+  #   JSON is deserialized to a Hash<String, Object>
+  def initialize(status, code=nil, body=nil)
+    @status, @code, @body = status, code, body
   end
 end
