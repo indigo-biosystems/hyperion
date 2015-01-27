@@ -16,10 +16,10 @@ describe Hyperion do
 
       Hyperion.send(hyp_method, 'http://somesite.org') do |svr|
         svr.allow(get_user_route) do
-          success_response({'name' => 'freddy'})
+          {'name' => 'freddy'}
         end
         svr.allow(post_greeting_route) do |req|
-          success_response({'greeting' => "hello, #{req.body['name']}"})
+          {'greeting' => "hello, #{req.body['name']}"}
         end
       end
 

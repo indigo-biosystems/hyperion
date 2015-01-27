@@ -31,12 +31,30 @@ class Hyperion
       Mimic.mimic(port: @port) do
         server.rules.map(&:mimic_route).uniq.each do |mimic_route|
           send(mimic_route.method, mimic_route.path) do
-            rule = server.find_matching_rule(mimic_route, request)
-            rule.handler.call(server.make_req_obj(request.body.read, request.env['CONTENT_TYPE']))
+            server.invoke_handler(mimic_route, request)
           end
         end
       end
       @mimic_running = true
+    end
+
+    def invoke_handler(mimic_route, request)
+      rule     = find_matching_rule(mimic_route, request)
+      response = rule.handler.call(make_req_obj(request.body.read, request.env['CONTENT_TYPE']))
+      if rack_response?(response)
+        response
+      else
+        if rule.rest_route
+          response_format = rule.rest_route.response_descriptor.format
+          [200, {'Content-Type' => content_type_for(response_format)}, write(response, response_format)]
+        else
+          fail "An 'allow' block must return a rack-style response if it was not passed a RestRoute"
+        end
+      end
+    end
+
+    def rack_response?(x)
+      x.is_a?(Array) && x.size == 3 && x[0].is_a?(Integer) && x[1].is_a?(Hash)
     end
 
     def find_matching_rule(mimic_route, request)
@@ -80,17 +98,18 @@ class Hyperion
       def allow(*args, &handler)
         if args.size == 1 && args.first.is_a?(RestRoute)
           route = args.first
-          rules << Rule.new(MimicRoute.new(route.method, route.uri.path), route_headers(route), handler)
+          rules << Rule.new(MimicRoute.new(route.method, route.uri.path), route_headers(route), handler, route)
         else
+          # TODO: deprecate this
           method, path, headers = args
           headers ||= {}
-          rules << Rule.new(MimicRoute.new(method, path), headers, handler)
+          rules << Rule.new(MimicRoute.new(method, path), headers, handler, nil)
         end
       end
     end
 
     MimicRoute = ImmutableStruct.new(:method, :path)
-    Rule = ImmutableStruct.new(:mimic_route, :headers, :handler)
+    Rule = ImmutableStruct.new(:mimic_route, :headers, :handler, :rest_route)
     Request = ImmutableStruct.new(:body)
   end
 end

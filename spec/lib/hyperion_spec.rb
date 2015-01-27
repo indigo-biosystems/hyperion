@@ -44,7 +44,7 @@ describe Hyperion do
       end
       it 'returns the return value of the block' do
         stub_typho_response(200)
-        request_and_expect(123) do |r|
+        request_and_expect(123) do |_r|
           123
         end
       end
