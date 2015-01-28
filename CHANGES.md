@@ -5,3 +5,6 @@
 - If Hyperion.fake allow is passed a route, its block can now return an object instead of a rack-style response.
   The object is serialized according to the route's response descriptor.
 - Serialize the POST/PUT payload according to the route's payload descriptor.
+
+### 0.0.18
+- Return 404 instead of crashing when headers are the only thing preventing a faked route from matching.

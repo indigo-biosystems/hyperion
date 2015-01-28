@@ -8,26 +8,38 @@ describe Hyperion do
   shared_examples 'a web server' do
     let(:user_response_params) { ResponseDescriptor.new('user', 1, :json) }
 
-    it 'implements specific routes' do
-      get_user_route = RestRoute.new(:get, 'http://somesite.org/users/0', user_response_params)
-      post_greeting_route = RestRoute.new(:post, 'http://somesite.org/say_hello',
-                                          ResponseDescriptor.new('greeting', 1, :json),
-                                          PayloadDescriptor.new(:json))
-
-      Hyperion.send(hyp_method, 'http://somesite.org') do |svr|
-        svr.allow(get_user_route) do
-          {'name' => 'freddy'}
-        end
-        svr.allow(post_greeting_route) do |req|
-          {'greeting' => "hello, #{req.body['name']}"}
+    context 'given some routes' do
+      let!(:get_user_route){RestRoute.new(:get, 'http://somesite.org/users/0', user_response_params)}
+      let!(:post_greeting_route){RestRoute.new(:post, 'http://somesite.org/say_hello',
+                                               ResponseDescriptor.new('greeting', 1, :json),
+                                               PayloadDescriptor.new(:json))}
+      before :each do
+        Hyperion.send(hyp_method, 'http://somesite.org') do |svr|
+          svr.allow(get_user_route) do
+            {'name' => 'freddy'}
+          end
+          svr.allow(post_greeting_route) do |req|
+            {'greeting' => "hello, #{req.body['name']}"}
+          end
         end
       end
+      it 'implements specific routes' do
+        result = Hyperion.request(get_user_route)
+        expect_success(result, {'name' => 'freddy'})
 
-      result = Hyperion.request(get_user_route)
-      expect_success(result, {'name' => 'freddy'})
+        result = Hyperion.request(post_greeting_route, write({'name' => 'freddy'}, :json))
+        expect_success(result, {'greeting' => 'hello, freddy'})
+      end
+      it 'returns 404 if a requested route is not stubbed' do
+        bad_path = RestRoute.new(:get, 'http://somesite.org/abc', user_response_params)
+        bad_headers = RestRoute.new(:get, 'http://somesite.org/users/0', ResponseDescriptor.new('abc', 1, :json))
 
-      result = Hyperion.request(post_greeting_route, write({'name' => 'freddy'}, :json))
-      expect_success(result, {'greeting' => 'hello, freddy'})
+        result = Hyperion.request(bad_path)
+        expect(result.code).to eql 404
+
+        result = Hyperion.request(bad_headers)
+        expect(result.code).to eql 404
+      end
     end
 
     it 'considers the HTTP method to be part of the route' do

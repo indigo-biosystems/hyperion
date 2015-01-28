@@ -40,6 +40,9 @@ class Hyperion
 
     def invoke_handler(mimic_route, request)
       rule     = find_matching_rule(mimic_route, request)
+      unless rule
+        return [404, {}, "Not stubbed: #{mimic_route.inspect} #{request.env}"]
+      end
       response = rule.handler.call(make_req_obj(request.body.read, request.env['CONTENT_TYPE']))
       if rack_response?(response)
         response

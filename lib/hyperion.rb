@@ -61,6 +61,7 @@ class Hyperion
 
   def make_result(typho_result, continuation=nil)
     make = ->klass do
+      # should this use the response 'Content-Type' instead of response_descriptor.format?
       read_body = ->{read(typho_result.body, route.response_descriptor.format)}
       if typho_result.success?
         klass.new(HyperionResult::Status::SUCCESS, typho_result.code, read_body.call)
