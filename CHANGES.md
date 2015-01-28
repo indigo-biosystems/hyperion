@@ -8,3 +8,6 @@
 
 ### 0.0.18
 - Return 404 instead of crashing when headers are the only thing preventing a faked route from matching.
+
+### 0.0.19
+- Log stubs and requests for debugging purposes.

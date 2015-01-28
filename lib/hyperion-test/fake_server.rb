@@ -91,6 +91,7 @@ class Hyperion
 
     class Setup
       include Hyperion::Headers
+      include Hyperion::Logger
 
       def rules
         @rules ||= []
@@ -99,14 +100,22 @@ class Hyperion
       # allow(route)
       # allow(method, path, headers={})
       def allow(*args, &handler)
+        rule = allowed_rule(args, handler)
+        rules << rule
+        log_stub(rule)
+      end
+
+      private
+
+      def allowed_rule(args, handler)
         if args.size == 1 && args.first.is_a?(RestRoute)
           route = args.first
-          rules << Rule.new(MimicRoute.new(route.method, route.uri.path), route_headers(route), handler, route)
+          Rule.new(MimicRoute.new(route.method, route.uri.path), route_headers(route), handler, route)
         else
           # TODO: deprecate this
           method, path, headers = args
           headers ||= {}
-          rules << Rule.new(MimicRoute.new(method, path), headers, handler, nil)
+          Rule.new(MimicRoute.new(method, path), headers, handler, nil)
         end
       end
     end

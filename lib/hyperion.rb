@@ -9,6 +9,7 @@ require 'continuation'
 class Hyperion
   include Headers
   include Formats
+  include Logger
 
   # @param route [RestRoute]
   # @param body [String] the body to send with POST or PUT
@@ -30,7 +31,10 @@ class Hyperion
   # @private
   def request(body=nil, additional_headers={})
     all_headers = route_headers(route).merge(additional_headers)
-    typho_result = Typho.request(transform_uri(route.uri).to_s,
+
+    uri = transform_uri(route.uri).to_s
+    log_request(route, uri)
+    typho_result = Typho.request(uri,
                                  method: route.method,
                                  headers: all_headers,
                                  body: body && write(body, route.payload_descriptor.format))

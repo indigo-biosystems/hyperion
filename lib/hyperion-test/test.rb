@@ -10,6 +10,7 @@ class Hyperion
     include Formats
     include Headers
     include TestFrameworkHooks
+    include Logger
 
     def fake(base_uri, &routes)
       if !@running
@@ -43,7 +44,7 @@ class Hyperion
       server_uri = servers.keys.detect{|server_uri| URI(server_uri).base == uri.base}
       if server_uri
         new_uri = URI(uri).change_base(URI("http://localhost:#{servers[server_uri].port}"))
-        puts "Hyperion redirected #{uri}  ==>  #{new_uri}"
+        logger.debug "Hyperion is redirecting #{uri}  ==>  #{new_uri}"
         new_uri
       else
         uri
