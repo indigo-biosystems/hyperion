@@ -32,7 +32,7 @@ class RestRoute
   # @param uri [String, URI]
   # @param response_descriptor [ResponseDescriptor]
   # @param payload_descriptor [PayloadDescriptor]
-  Contract Symbol, Or[String, URI], ResponseDescriptor, PayloadDescriptor => Any
+  Contract Symbol, Or[String, URI], ResponseDescriptor, Or[PayloadDescriptor, nil] => Any
   def initialize(method, uri, response_descriptor, payload_descriptor=nil)
     @method = method
     @uri = URI(uri)
