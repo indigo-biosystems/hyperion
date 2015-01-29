@@ -1,5 +1,11 @@
 require 'immutable_struct'
 # Hyperion::Util.require_recursive '.' #TODO: extract the requiring into utils or someplace
+
+require 'contracts'
+require 'hyperion/contracts'
+include Contracts
+include Hyperion::Contracts
+
 Dir.glob(File.join(File.dirname(__FILE__), '*.rb')).each{|path| require_relative(path)}
 Dir.glob(File.join(File.dirname(__FILE__), 'hyperion/**/*.rb')).each{|path| require_relative(path)}
 require 'typhoeus'
@@ -19,6 +25,7 @@ class Hyperion
   # @yieldparam [HyperionResult]
   # @return [HyperionResult, Object] If a block is provided, returns the block's
   #   return value; otherwise, returns the result.
+  Contract RestRoute, Any, Hash => Or[HyperionResult, Object]
   def self.request(route, body=nil, additional_headers={}, &block)
     self.new(route).request(body, additional_headers, &block)
   end

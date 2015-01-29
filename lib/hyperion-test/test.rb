@@ -12,6 +12,7 @@ class Hyperion
     include TestFrameworkHooks
     include Logger
 
+    Contract Or[String, URI] => Any
     def fake(base_uri, &routes)
       if !@running
         hook_teardown if can_hook_teardown? && !teardown_registered?

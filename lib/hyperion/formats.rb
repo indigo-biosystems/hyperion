@@ -1,7 +1,14 @@
 require 'oj'
+require 'hyperion/enum'
 
 class Hyperion
   module Formats
+    module Known
+      include Enum
+      JSON = :json
+      PROTOBUF = :protobuf
+    end
+
     def write(obj, format)
       return obj if obj.is_a?(String)
       case format

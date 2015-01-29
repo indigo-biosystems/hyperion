@@ -9,11 +9,11 @@ class Hyperion
 
     describe '#route_headers' do
       it 'creates an accept header for the response descriptor' do
-        headers = route_headers(RestRoute.new(:get, uri, ResponseDescriptor.new('ttt', '999', :json)))
+        headers = route_headers(RestRoute.new(:get, uri, ResponseDescriptor.new('ttt', 999, :json)))
         expect(headers['Accept']).to eql 'application/vnd.indigobio-ascent.ttt-v999+json'
       end
       it 'creates a content-type header for the payload descriptor' do
-        headers = route_headers(RestRoute.new(:get, uri, ResponseDescriptor.new('ttt', '999', :json), PayloadDescriptor.new(:json)))
+        headers = route_headers(RestRoute.new(:get, uri, ResponseDescriptor.new('ttt', 999, :json), PayloadDescriptor.new(:json)))
         expect(headers['Content-Type']).to eql 'application/json'
       end
     end

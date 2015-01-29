@@ -11,3 +11,6 @@
 
 ### 0.0.19
 - Log stubs and requests for debugging purposes.
+
+### 0.0.20
+- Added contracts to some public methods to provide more helpful error messages when passed invalid arguments.
