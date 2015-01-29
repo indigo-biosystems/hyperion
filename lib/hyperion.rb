@@ -25,8 +25,12 @@ class Hyperion
   # @yieldparam [HyperionResult]
   # @return [HyperionResult, Object] If a block is provided, returns the block's
   #   return value; otherwise, returns the result.
-  Contract RestRoute, Any, Hash, Proc => Or[HyperionResult, Object]
   def self.request(route, body=nil, additional_headers={}, &block)
+    request_impl(route, body, additional_headers, &block)
+  end
+
+  Contract RestRoute, Any, Hash, Proc => Or[HyperionResult, Object]
+  def self.request_impl(route, body, additional_headers, &block)
     self.new(route).request(body, additional_headers, &block)
   end
 
