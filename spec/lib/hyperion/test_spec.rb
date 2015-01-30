@@ -40,6 +40,18 @@ describe Hyperion do
         result = Hyperion.request(bad_headers)
         expect(result.code).to eql 404
       end
+
+      it 'allows rack results to be returned' do
+        Hyperion.send(hyp_method, get_user_route.uri.base) do |svr|
+          svr.allow(get_user_route) {
+            [404, {}, nil]
+          }
+        end
+
+        result = Hyperion.request(get_user_route)
+        expect(result.body).to be_nil
+        expect(result.code).to eql 404
+      end
     end
 
     it 'considers the HTTP method to be part of the route' do
@@ -117,6 +129,23 @@ describe Hyperion do
 
       result = Hyperion.request(RestRoute.new(:get, 'http://indigo.com:4000/welcome', user_response_params))
       expect(result.body).to eql({'text' => 'hello from indigo@4000'})
+    end
+
+    it 'defaults the base port to port 80' do
+      Hyperion.send(hyp_method, 'http://indigo.com') do |svr|
+        svr.allow(:get, '/welcome') { success_response({'text' => 'old handler'}) }
+      end
+
+      # override the previous one
+      Hyperion.send(hyp_method, 'http://indigo.com:80') do |svr|
+        svr.allow(:get, '/welcome') { success_response({'text' => 'new handler'}) }
+      end
+
+      result = Hyperion.request(RestRoute.new(:get, 'http://indigo.com/welcome', user_response_params))
+      expect(result.body).to eql({'text' => 'new handler'})
+
+      result = Hyperion.request(RestRoute.new(:get, 'http://indigo.com:80/welcome', user_response_params))
+      expect(result.body).to eql({'text' => 'new handler'})
     end
 
     it 'allows routes to be augmented' do

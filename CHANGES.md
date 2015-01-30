@@ -17,3 +17,6 @@
 
 ### 0.0.25
 - Allow payload descriptor to be nil (for things like DELETE).
+
+### 0.0.26
+- Fixed bug with Hyperion fake not defaulting the port to 80

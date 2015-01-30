@@ -57,7 +57,7 @@ class Hyperion
     end
 
     def rack_response?(x)
-      x.is_a?(Array) && x.size == 3 && x[0].is_a?(Integer) && x[1].is_a?(Hash)
+      x.is_a?(Array) && x.size == 3 && x.first.is_a?(Integer) && x.drop(1).any?{|y| !y.is_a?(Integer)}
     end
 
     def find_matching_rule(mimic_route, request)

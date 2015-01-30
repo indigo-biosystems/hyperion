@@ -14,6 +14,7 @@ class Hyperion
 
     Contract Or[String, URI] => Any
     def fake(base_uri, &routes)
+      base_uri = URI(base_uri).base # normalize it
       if !@running
         hook_teardown if can_hook_teardown? && !teardown_registered?
         @running = true
