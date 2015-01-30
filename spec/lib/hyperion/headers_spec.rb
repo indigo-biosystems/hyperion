@@ -19,12 +19,19 @@ class Hyperion
     end
 
     describe '#content_type_for' do
+      it 'accepts format as a symbol' do
+        expect(content_type_for(:json)).to eql 'application/json'
+      end
+      it 'accepts format as a descriptor' do
+        descriptor = double(format: :json)
+        expect(content_type_for(descriptor)).to eql 'application/json'
+      end
       it 'returns the content type for the given format' do
         expect(content_type_for(:json)).to eql 'application/json'
         expect(content_type_for(:protobuf)).to eql 'application/x-protobuf'
       end
-      it 'raises an error if the format is unknown' do
-        expect{content_type_for(:aaa)}.to raise_error
+      it 'returns application/octet-stream if the format is unknown' do
+        expect(content_type_for(:aaa)).to eql 'application/octet-stream'
       end
     end
 
@@ -33,7 +40,7 @@ class Hyperion
         expect(format_for('application/json')).to eql :json
         expect(format_for('application/x-protobuf')).to eql :protobuf
       end
-      it 'raises an error if the format is unknown' do
+      it 'raises an error if the content type is unknown' do
         expect{format_for('aaa/bbb')}.to raise_error
       end
     end

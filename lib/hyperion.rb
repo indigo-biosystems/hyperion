@@ -48,7 +48,7 @@ class Hyperion
     typho_result = Typho.request(uri,
                                  method: route.method,
                                  headers: all_headers,
-                                 body: body && write(body, route.payload_descriptor.format))
+                                 body: body && write(body, route.payload_descriptor))
 
     if block_given?
       callcc do |cont|
@@ -77,7 +77,7 @@ class Hyperion
   def make_result(typho_result, continuation=nil)
     make = ->klass do
       # should this use the response 'Content-Type' instead of response_descriptor.format?
-      read_body = ->{read(typho_result.body, route.response_descriptor.format)}
+      read_body = ->{read(typho_result.body, route.response_descriptor)}
       if typho_result.success?
         klass.new(HyperionResult::Status::SUCCESS, typho_result.code, read_body.call)
       elsif typho_result.timed_out?

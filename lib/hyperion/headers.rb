@@ -5,7 +5,9 @@ class Hyperion
       headers = {}
       rd = route.response_descriptor
       pd = route.payload_descriptor
-      headers['Accept'] = "application/vnd.indigobio-ascent.#{rd.type}-v#{rd.version}+#{rd.format}"
+      if rd
+        headers['Accept'] = "application/vnd.indigobio-ascent.#{rd.type}-v#{rd.version}+#{rd.format}"
+      end
       if pd
         headers['Content-Type'] = content_type_for(pd.format)
       end
@@ -16,9 +18,9 @@ class Hyperion
                     [:protobuf, 'application/x-protobuf']]
 
     def content_type_for(format)
+      format = Hyperion::Formats.get_from(format)
       ct = ContentTypes.detect{|x| x.first == format}
-      raise "Unsupported format: #{format}" unless ct
-      ct.last
+      ct ? ct.last : 'application/octet-stream'
     end
 
     def format_for(content_type)

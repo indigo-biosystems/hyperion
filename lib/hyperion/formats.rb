@@ -10,8 +10,10 @@ class Hyperion
     end
 
     def write(obj, format)
-      return obj if obj.is_a?(String)
-      case format
+      return obj if obj.is_a?(String) || obj.nil?
+      return obj if format.nil?
+
+      case Formats.get_from(format)
         when :json; Oj.dump(obj)
         when :protobuf; obj
         else; raise "Unsupported format: #{format}"
@@ -20,11 +22,17 @@ class Hyperion
 
     def read(bytes, format)
       return nil if bytes.nil?
-      case format
+      return bytes if format.nil?
+
+      case Formats.get_from(format)
         when :json; read_json(bytes)
         when :protobuf; bytes
         else; raise "Unsupported format: #{format}"
       end
+    end
+
+    def self.get_from(x)
+      x.respond_to?(:format) ? x.format : x
     end
 
     private

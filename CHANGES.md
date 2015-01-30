@@ -14,3 +14,6 @@
 
 ### 0.0.20
 - Added contracts to some public methods to provide more helpful error messages when passed invalid arguments.
+
+### 0.0.25
+- Allow payload descriptor to be nil (for things like DELETE).
