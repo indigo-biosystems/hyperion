@@ -20,3 +20,7 @@
 
 ### 0.0.26
 - Fixed bug with Hyperion fake not defaulting the port to 80
+
+### 0.0.27
+- Use Rails.logger if present
+

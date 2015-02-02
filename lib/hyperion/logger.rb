@@ -3,7 +3,16 @@ class Hyperion
     include Hyperion::Headers
 
     def logger
-      @logger ||= ::Logger.new(STDOUT)
+      Hyperion::Logger.logger
+    end
+
+    # static so config-like files like spec_helper.rb can set the log level globally
+    def self.logger
+      Kernel.const_defined?(:Rails) ? Rails.logger : default_logger
+    end
+
+    def self.default_logger
+      @default_logger ||= ::Logger.new($stdout)
     end
 
     def log_request(route, uri)
