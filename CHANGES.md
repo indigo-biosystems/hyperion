@@ -24,3 +24,6 @@
 ### 0.0.27
 - Use Rails.logger if present
 
+### 0.0.28
+- Use Rails.logger if present and not nil
+

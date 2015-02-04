@@ -8,7 +8,11 @@ class Hyperion
 
     # static so config-like files like spec_helper.rb can set the log level globally
     def self.logger
-      Kernel.const_defined?(:Rails) ? Rails.logger : default_logger
+      rails_logger_available? ? Rails.logger : default_logger
+    end
+
+    def self.rails_logger_available?
+      Kernel.const_defined?(:Rails) && !Rails.logger.nil?
     end
 
     def self.default_logger
