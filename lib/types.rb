@@ -39,6 +39,10 @@ class RestRoute
     @response_descriptor = response_descriptor
     @payload_descriptor = payload_descriptor
   end
+
+  def to_s
+    "#{method.to_s.upcase} #{uri}"
+  end
 end
 
 class HyperionResult
