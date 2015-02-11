@@ -95,6 +95,12 @@ describe Hyperion do
             r.when(200) { true }
           end
         end
+        it 'matches return code ranges' do
+          stub_typho_response(404)
+          request_and_expect(true) do |r|
+            r.when(400..499) { true }
+          end
+        end
         it 'matches result states' do
           stub_typho_response(999, true)
           request_and_expect(true) do |r|

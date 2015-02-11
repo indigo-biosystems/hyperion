@@ -114,6 +114,8 @@ class Hyperion
         status_checker(condition)
       elsif condition.is_a?(Integer)
         code_checker(condition)
+      elsif condition.is_a?(Range)
+        range_checker(condition)
       elsif condition.respond_to?(:call)
         condition
       end
@@ -125,6 +127,10 @@ class Hyperion
 
     def code_checker(code)
       ->r{r.code == code}
+    end
+
+    def range_checker(range)
+      ->r{range.include?(r.code)}
     end
   end
 

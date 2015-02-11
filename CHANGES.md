@@ -27,3 +27,6 @@
 ### 0.0.28
 - Use Rails.logger if present and not nil
 
+### 0.0.29
+- Pretty RestRoute.to_s
+- Added the ability to match responses on an HTTP code range
