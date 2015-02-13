@@ -30,3 +30,12 @@
 ### 0.0.29
 - Pretty RestRoute.to_s
 - Added the ability to match responses on an HTTP code range
+
+### 0.0.30
+- locked 'contracts' gem to version 0.5 due to possible incompatibility with ascent-web
+
+
+### 0.0.31
+- disabled method contracts due to apparent weirdness
+- enable Oj's 'compat' mode to allow writing of both string- and symbol-keyed hashes
+- write Time objects to JSON as ISO 8601 (Indigo convention)

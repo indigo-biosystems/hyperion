@@ -10,7 +10,7 @@ class ResponseDescriptor
   # @param type [String]
   # @param version [Integer]
   # @param format [Symbol] :json
-  Contract String, And[Integer, Pos], ValidEnum[Hyperion::Formats::Known] => Any
+  # Contract String, And[Integer, Pos], ValidEnum[Hyperion::Formats::Known] => Any
   def initialize(type, version, format)
     @type, @version, @format = type, version, format
   end
@@ -19,7 +19,7 @@ end
 class PayloadDescriptor
   attr_reader :format
 
-  Contract ValidEnum[Hyperion::Formats::Known] => Any
+  # Contract ValidEnum[Hyperion::Formats::Known] => Any
   def initialize(format)
     @format = format
   end
@@ -32,7 +32,7 @@ class RestRoute
   # @param uri [String, URI]
   # @param response_descriptor [ResponseDescriptor]
   # @param payload_descriptor [PayloadDescriptor]
-  Contract Symbol, Or[String, URI], Or[ResponseDescriptor, nil], Or[PayloadDescriptor, nil] => Any
+  # Contract Symbol, Or[String, URI], Or[ResponseDescriptor, nil], Or[PayloadDescriptor, nil] => Any
   def initialize(method, uri, response_descriptor=nil, payload_descriptor=nil)
     @method = method
     @uri = URI(uri)
@@ -61,7 +61,7 @@ class HyperionResult
   # @param body [Object, Hash<String,Object>] the deserialized response body.
   #   The type is determined by the content-type.
   #   JSON is deserialized to a Hash<String, Object>
-  Contract ValidEnum[Status], Or[And[Integer, Pos], nil], Any => Any
+  # Contract ValidEnum[Status], Or[And[Integer, Pos], nil], Any => Any
   def initialize(status, code=nil, body=nil)
     @status, @code, @body = status, code, body
   end

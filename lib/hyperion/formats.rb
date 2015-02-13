@@ -1,5 +1,6 @@
 require 'oj'
 require 'hyperion/enum'
+require 'stringio'
 
 class Hyperion
   module Formats
@@ -14,7 +15,7 @@ class Hyperion
       return obj if format.nil?
 
       case Formats.get_from(format)
-        when :json; Oj.dump(obj)
+        when :json; write_json(obj)
         when :protobuf; obj
         else; raise "Unsupported format: #{format}"
       end
@@ -37,9 +38,18 @@ class Hyperion
 
     private
 
+    def write_json(obj)
+      begin
+        TimeAsJsonShim.hyperion_mode = true
+        Oj.dump(obj, mode: :compat)
+      ensure
+        TimeAsJsonShim.hyperion_mode = false
+      end
+    end
+
     def read_json(bytes)
       begin
-        Oj.load(bytes)
+        Oj.compat_load(bytes, mode: :compat)
       rescue Oj::ParseError => e
         line, col = get_oj_line_and_col(e)
         if line
@@ -56,4 +66,24 @@ class Hyperion
     end
 
   end
+end
+
+module TimeAsJsonShim
+  class << self
+    attr_accessor :hyperion_mode
+  end
+
+  def as_json(*)
+    if TimeAsJsonShim.hyperion_mode
+      self.utc.iso8601(3)
+    elsif defined? super
+      super
+    else
+      to_s
+    end
+  end
+end
+
+class Time
+  include TimeAsJsonShim
 end

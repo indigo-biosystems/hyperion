@@ -3,8 +3,8 @@ require 'immutable_struct'
 
 require 'contracts'
 require 'hyperion/contracts'
-include Contracts
-include Hyperion::Contracts
+# include Contracts
+# include Hyperion::Contracts
 
 Dir.glob(File.join(File.dirname(__FILE__), '*.rb')).each{|path| require_relative(path)}
 Dir.glob(File.join(File.dirname(__FILE__), 'hyperion/**/*.rb')).each{|path| require_relative(path)}
@@ -29,7 +29,7 @@ class Hyperion
     request_impl(route, body, additional_headers, &block)
   end
 
-  Contract RestRoute, Any, Hash, Proc => Or[HyperionResult, Object]
+  # Contract RestRoute, Any, Hash, Proc => Or[HyperionResult, Object]
   def self.request_impl(route, body, additional_headers, &block)
     self.new(route).request(body, additional_headers, &block)
   end
