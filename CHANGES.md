@@ -41,3 +41,7 @@
 
 ### 0.0.32
 - Include requested route on response object
+
+### 0.0.33
+- Pretty HyperionResult#to_s
+

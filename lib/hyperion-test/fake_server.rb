@@ -39,7 +39,7 @@ class Hyperion
     end
 
     def invoke_handler(mimic_route, request)
-      rule     = find_matching_rule(mimic_route, request)
+      rule = find_matching_rule(mimic_route, request)
       unless rule
         return [404, {}, "Not stubbed: #{mimic_route.inspect} #{request.env}"]
       end

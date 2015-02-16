@@ -65,4 +65,17 @@ class HyperionResult
   def initialize(route, status, code=nil, body=nil)
     @route, @status, @code, @body = route, status, code, body
   end
+
+  def to_s
+    case status
+      when Status::SUCCESS
+        "Success: #{route.to_s}"
+      when Status::TIMED_OUT
+        "Timed out: #{route.to_s}"
+      when Status::NO_RESPONSE
+        "No response: #{route.to_s}"
+      when Status::CHECK_CODE
+        "HTTP #{code}: #{route.to_s}"
+    end
+  end
 end

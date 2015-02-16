@@ -1,3 +1,3 @@
 class Hyperion
-  VERSION = '0.0.32'
+  VERSION = '0.0.33'
 end
