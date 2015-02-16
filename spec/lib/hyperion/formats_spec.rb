@@ -1,8 +1,6 @@
 require 'spec_helper'
 require 'time'
 
-
-
 class Hyperion
   describe Formats do
     include Formats

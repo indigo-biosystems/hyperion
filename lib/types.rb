@@ -46,7 +46,7 @@ class RestRoute
 end
 
 class HyperionResult
-  attr_reader :status, :code, :body
+  attr_reader :route, :status, :code, :body
 
   module Status
     include Enum
@@ -62,7 +62,7 @@ class HyperionResult
   #   The type is determined by the content-type.
   #   JSON is deserialized to a Hash<String, Object>
   # Contract ValidEnum[Status], Or[And[Integer, Pos], nil], Any => Any
-  def initialize(status, code=nil, body=nil)
-    @status, @code, @body = status, code, body
+  def initialize(route, status, code=nil, body=nil)
+    @route, @status, @code, @body = route, status, code, body
   end
 end

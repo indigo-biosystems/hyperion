@@ -30,6 +30,7 @@ describe Hyperion do
       expect(result.status).to eql HyperionResult::Status::SUCCESS
       expect(result.code).to eql 200
       expect(result.body).to eql({'foo' => 'bar'})
+      expect(result.route).to eql route
     end
 
     context 'serialization' do

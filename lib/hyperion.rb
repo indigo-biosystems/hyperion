@@ -79,13 +79,13 @@ class Hyperion
       # should this use the response 'Content-Type' instead of response_descriptor.format?
       read_body = ->{read(typho_result.body, route.response_descriptor)}
       if typho_result.success?
-        klass.new(HyperionResult::Status::SUCCESS, typho_result.code, read_body.call)
+        klass.new(route, HyperionResult::Status::SUCCESS, typho_result.code, read_body.call)
       elsif typho_result.timed_out?
-        klass.new(HyperionResult::Status::TIMED_OUT)
+        klass.new(route, HyperionResult::Status::TIMED_OUT)
       elsif typho_result.code == 0
-        klass.new(HyperionResult::Status::NO_RESPONSE)
+        klass.new(route, HyperionResult::Status::NO_RESPONSE)
       else
-        klass.new(HyperionResult::Status::CHECK_CODE, typho_result.code, read_body.call)
+        klass.new(route, HyperionResult::Status::CHECK_CODE, typho_result.code, read_body.call)
       end
     end
 
