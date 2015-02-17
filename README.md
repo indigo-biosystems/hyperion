@@ -1,6 +1,6 @@
 # Hyperion
 
-Hyperion is a gem for internal Indigo Biosystems projects.
+Hyperion is a REST client that follows certain conventions layered on top of HTTP.
 
 It revolves around the idea of a _route_, which is a combination of:
 - HTTP method

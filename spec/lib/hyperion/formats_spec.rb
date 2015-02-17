@@ -1,5 +1,6 @@
 require 'spec_helper'
 require 'time'
+require 'hyperion'
 
 class Hyperion
   describe Formats do

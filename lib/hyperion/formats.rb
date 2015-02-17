@@ -1,5 +1,5 @@
 require 'oj'
-require 'hyperion/enum'
+require 'hyperion'
 require 'stringio'
 
 class Hyperion

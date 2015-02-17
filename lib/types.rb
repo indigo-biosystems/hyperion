@@ -1,6 +1,7 @@
 require 'uri'
 require 'hyperion/enum'
 require 'hyperion/formats'
+require 'delegate'
 
 PayloadDescriptor = ImmutableStruct.new(:format)
 
@@ -35,7 +36,7 @@ class RestRoute
   # Contract Symbol, Or[String, URI], Or[ResponseDescriptor, nil], Or[PayloadDescriptor, nil] => Any
   def initialize(method, uri, response_descriptor=nil, payload_descriptor=nil)
     @method = method
-    @uri = URI(uri)
+    @uri = HyperionUri.new(uri)
     @response_descriptor = response_descriptor
     @payload_descriptor = payload_descriptor
   end

@@ -14,7 +14,7 @@ class Hyperion
 
     # Contract Or[String, URI] => Any
     def fake(base_uri, &routes)
-      base_uri = URI(base_uri).base # normalize it
+      base_uri = HyperionUri.new(base_uri).base # normalize it
       if !@running
         hook_teardown if can_hook_teardown? && !teardown_registered?
         @running = true
@@ -43,9 +43,10 @@ class Hyperion
 
     # redirect normal Hyperion requests to the appropriate fake server
     def transform_uri(uri)
-      server_uri = servers.keys.detect{|server_uri| URI(server_uri).base == uri.base}
+      server_uri = servers.keys.detect{|server_uri| HyperionUri.new(server_uri).base == uri.base}
       if server_uri
-        new_uri = URI(uri).change_base(URI("http://localhost:#{servers[server_uri].port}"))
+        new_uri = HyperionUri.new(uri)
+        new_uri.base = "http://localhost:#{servers[server_uri].port}"
         logger.debug "Hyperion is redirecting #{uri}  ==>  #{new_uri}"
         new_uri
       else

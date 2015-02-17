@@ -45,3 +45,5 @@
 ### 0.0.33
 - Pretty HyperionResult#to_s
 
+### 0.0.34
+- HyperionUri (models query params as a hash)
