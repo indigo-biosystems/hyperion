@@ -45,5 +45,11 @@ class Hyperion
       end
     end
 
+    describe '#short_mimetype' do
+      it 'returns the short mime type' do
+        expect(short_mimetype(ResponseDescriptor.new('ttt', 999, :json))).to eql 'ttt-v999+json'
+      end
+    end
+
   end
 end

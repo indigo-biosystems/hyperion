@@ -4,9 +4,11 @@ require 'hyperion'
 describe HyperionResult do
   describe '#to_s' do
     let!(:route) { RestRoute.new(:get, 'http://somesite.org/foo/bar') }
+
     def make_result(status)
       HyperionResult.new(route, status, 432)
     end
+
     it 'pretty prints the result' do
       msg = "Success: #{route.to_s}"
       expect(make_result(HyperionResult::Status::SUCCESS).to_s).to eql msg
@@ -21,4 +23,16 @@ describe HyperionResult do
       expect(make_result(HyperionResult::Status::CHECK_CODE).to_s).to eql msg
     end
   end
+end
+
+describe ResponseDescriptor do
+  include Hyperion::Headers
+
+  describe '#to_s' do
+    it 'returns the short mimetype' do
+      rd = ResponseDescriptor.new('ttt', 999, :json)
+      expect(rd.to_s).to eql short_mimetype(rd)
+    end
+  end
+
 end

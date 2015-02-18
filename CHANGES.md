@@ -52,3 +52,6 @@
 
 ### 0.0.35
 - Canonicalize HyperionUri#to_s output by sorting query param names to make route matching possible.
+
+### 0.0.36
+- Pretty ResponseDescriptor#to_s

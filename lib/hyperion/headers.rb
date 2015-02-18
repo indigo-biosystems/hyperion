@@ -6,12 +6,17 @@ class Hyperion
       rd = route.response_descriptor
       pd = route.payload_descriptor
       if rd
-        headers['Accept'] = "application/vnd.indigobio-ascent.#{rd.type}-v#{rd.version}+#{rd.format}"
+        headers['Accept'] = "application/vnd.indigobio-ascent.#{short_mimetype(rd)}"
       end
       if pd
         headers['Content-Type'] = content_type_for(pd.format)
       end
       headers
+    end
+
+    def short_mimetype(response_descriptor)
+      x = response_descriptor
+      "#{x.type}-v#{x.version}+#{x.format}"
     end
 
     ContentTypes = [[:json, 'application/json'],
