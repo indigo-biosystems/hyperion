@@ -41,7 +41,7 @@ describe HyperionUri do
     u = HyperionUri.new('http://yum.com:44/res')
     u.query_hash[:name] = 'foo bar'
     u.query_hash['id'] = '123'
-    expect(u.query).to eql 'name=foo+bar&id=123'
+    expect(u.query).to eql 'id=123&name=foo+bar'
   end
 
   it 'setting a query string replaces the query hash' do
@@ -49,6 +49,11 @@ describe HyperionUri do
     u.query = 'a=1'
     expect(u.query).to eql 'a=1'
     expect(u.query_hash).to eql({'a' => '1'})
+  end
+
+  it 'orders query params by name' do
+    u = HyperionUri.new('http://yum.com:44/res', {b: 1, a: 2})
+    expect(u.query).to eql 'a=2&b=1'
   end
 
   describe '#initialize' do

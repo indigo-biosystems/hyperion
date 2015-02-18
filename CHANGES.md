@@ -49,3 +49,6 @@
 - HyperionUri (models query params as a hash)
 - Fixed logging bug where the logger would capture $stdout the first time it saw it
   and always use that object instead of always using the current value of $stdout.
+
+### 0.0.35
+- Canonicalize HyperionUri#to_s output by sorting query param names to make route matching possible.

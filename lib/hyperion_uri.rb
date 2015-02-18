@@ -67,7 +67,7 @@ class HyperionUri < SimpleDelegator
 
   def query_string(query_hash)
     return nil if query_hash == {}
-    query_hash.map{|k, v| "#{k.to_s}=#{URI.encode_www_form_component(v)}"}.join('&')
+    query_hash.stringify_keys.sort_by{|(k, v)| k}.map{|(k, v)| "#{k.to_s}=#{URI.encode_www_form_component(v)}"}.join('&')
   end
 
   def make_ruby_uri(x)
