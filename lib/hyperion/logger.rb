@@ -2,21 +2,12 @@ class Hyperion
   module Logger
     include Hyperion::Headers
 
+    class << self
+      attr_accessor :level
+    end
+
     def logger
-      Hyperion::Logger.logger
-    end
-
-    # static so config-like files like spec_helper.rb can set the log level globally
-    def self.logger
       rails_logger_available? ? Rails.logger : default_logger
-    end
-
-    def self.rails_logger_available?
-      Kernel.const_defined?(:Rails) && !Rails.logger.nil?
-    end
-
-    def self.default_logger
-      @default_logger ||= ::Logger.new($stdout)
     end
 
     def log_request(route, uri)
@@ -31,6 +22,16 @@ class Hyperion
     end
 
     private
+
+    def rails_logger_available?
+      Kernel.const_defined?(:Rails) && !Rails.logger.nil?
+    end
+
+    def default_logger
+      logger = ::Logger.new($stdout)
+      logger.level = Hyperion::Logger.level || ::Logger::DEBUG
+      logger
+    end
 
     def log_headers(headers)
       headers.each_pair { |k, v| logger.debug "    #{k}: #{v}" }

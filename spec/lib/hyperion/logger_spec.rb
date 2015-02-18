@@ -5,7 +5,7 @@ require 'stringio'
 describe Hyperion::Logger do
   include Hyperion::Logger
 
-  it 'should log to $stdout by default' do
+  it 'logs to $stdout by default' do
     output = StringIO.new
     with_stdout(output) do
       logger.debug 'xyzzy'
@@ -16,7 +16,7 @@ describe Hyperion::Logger do
     expect(output_str).to include 'qwerty'
   end
 
-  it 'should log to Rails.logger if present' do
+  it 'logs to Rails.logger if present' do
     rails, logger = double, double
     allow(rails).to receive(:logger).and_return(logger)
     expect(logger).to receive(:debug).with('xyzzy')
@@ -24,6 +24,19 @@ describe Hyperion::Logger do
     with_rails(rails) do
       logger.debug 'xyzzy'
     end
+  end
+
+  it 'respects the log level' do
+    output = StringIO.new
+    with_stdout(output) do
+      Hyperion::Logger.level = Logger::ERROR
+      logger.debug 'xyzzy'
+      logger.error 'qwerty'
+      Hyperion::Logger.level = Logger::DEBUG
+    end
+    output_str = output.string
+    expect(output_str).to include 'qwert'
+    expect(output_str).to_not include 'xyzzy'
   end
 
   def with_stdout(tmp_stdout)
