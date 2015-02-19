@@ -40,16 +40,30 @@ describe Hyperion do
       expect(result.code).to eql 404
     end
 
-    it 'allows rack results to be returned' do
-      Hyperion.fake(get_user_route.uri.base) do |svr|
-        svr.allow(get_user_route) {
-          [404, {}, nil]
-        }
+    context 'when a rack result is provided for the response' do
+
+      it 'allows rack results to be returned' do
+        arrange([400, {}, nil])
+        act
+        expect(@result.code).to eql 400
+        expect(@result.body).to be_nil
       end
 
-      result = Hyperion.request(get_user_route)
-      expect(result.body).to be_nil
-      expect(result.code).to eql 404
+      it 'serializes the body as json if it is not a string' do
+        arrange([400, {}, {'message' => 'oops'}])
+        act
+        expect(@result.body).to eql({'message' => 'oops'})
+      end
+
+      def arrange(response)
+        Hyperion.fake(get_user_route.uri.base) do |svr|
+          svr.allow(get_user_route) { response }
+        end
+      end
+
+      def act
+        @result = Hyperion.request(get_user_route)
+      end
     end
   end
 

@@ -1,5 +1,6 @@
 require 'hyperion-test/test_framework_hooks'
 
+# TODO: this class is doing too much
 class Hyperion
   class FakeServer
     include Hyperion::Headers
@@ -45,7 +46,8 @@ class Hyperion
       end
       response = rule.handler.call(make_req_obj(request.body.read, request.env['CONTENT_TYPE']))
       if rack_response?(response)
-        response
+        code, headers, body = *response
+        [code, headers, write(body, :json)]
       else
         if rule.rest_route
           rd = rule.rest_route.response_descriptor

@@ -55,3 +55,5 @@
 
 ### 0.0.36
 - Pretty ResponseDescriptor#to_s
+- When using Hyperion.fake and a rack result is returned, the body is serialized as JSON
+  if it is not already a string.
