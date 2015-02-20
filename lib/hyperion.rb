@@ -102,7 +102,7 @@ class Hyperion
   class PredicatingHyperionResult < HyperionResult
     def when(condition, &action)
       if as_predicate(condition).call(self)
-        @continuation.call(action.call)
+        @continuation.call(action.call(self))
       end
       nil
     end

@@ -58,3 +58,6 @@
 - When using Hyperion.fake and a rack result is returned, the body is serialized as JSON
   if it is not already a string.
 - If parsing JSON fails, just return the unparsed JSON. (For 400s).
+
+### 0.0.37
+- Pass the HyperionResult to the `when` block, since it won't always be in lexical scope.
