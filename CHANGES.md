@@ -57,3 +57,4 @@
 - Pretty ResponseDescriptor#to_s
 - When using Hyperion.fake and a rack result is returned, the body is serialized as JSON
   if it is not already a string.
+- If parsing JSON fails, just return the unparsed JSON. (For 400s).

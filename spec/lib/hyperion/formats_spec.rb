@@ -53,6 +53,9 @@ class Hyperion
       it 'returns the input if format is nil' do
         expect(read('abc', nil)).to eql 'abc'
       end
+      it 'returns the input if the input is not parseable' do
+        expect(read('abc', :json)).to eql 'abc'
+      end
       context 'when reading json' do
         it 'accepts format as a symbol' do
           expect(read('{"a":1}', :json)).to eql({'a' => 1})

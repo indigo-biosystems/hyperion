@@ -1,9 +1,12 @@
 require 'oj'
 require 'hyperion'
 require 'stringio'
+require 'hyperion/logger'
 
 class Hyperion
   module Formats
+    include Hyperion::Logger
+
     module Known
       include Enum
       JSON = :json
@@ -51,12 +54,8 @@ class Hyperion
       begin
         Oj.compat_load(bytes, mode: :compat)
       rescue Oj::ParseError => e
-        line, col = get_oj_line_and_col(e)
-        if line
-          raise "#{e.message} : #{bytes.lines[line-1]}"
-        else
-          raise
-        end
+        logger.error e.message
+        bytes
       end
     end
 
