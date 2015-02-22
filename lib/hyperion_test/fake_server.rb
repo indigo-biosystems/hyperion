@@ -1,4 +1,4 @@
-require 'hyperion-test/test_framework_hooks'
+require 'hyperion_test/test_framework_hooks'
 
 # TODO: this class is doing too much
 class Hyperion

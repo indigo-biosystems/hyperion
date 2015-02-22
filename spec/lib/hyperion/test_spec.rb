@@ -1,5 +1,5 @@
 require 'spec_helper'
-require 'hyperion-test/test'
+require 'hyperion_test'
 
 
 describe Hyperion do

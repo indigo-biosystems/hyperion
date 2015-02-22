@@ -6,11 +6,12 @@ require 'hyperion/contracts'
 # include Contracts
 # include Hyperion::Contracts
 
-Dir.glob(File.join(File.dirname(__FILE__), '*.rb')).each{|path| require_relative(path)}
 Dir.glob(File.join(File.dirname(__FILE__), 'hyperion/**/*.rb')).each{|path| require_relative(path)}
 require 'typhoeus'
 require 'oj'
 require 'continuation'
+require 'abstractivator/proc_ext'
+require 'abstractivator/enumerable_ext'
 
 class Hyperion
   include Headers

@@ -114,6 +114,15 @@ describe Hyperion do
             r.when(->r{r.code == 999 && r.status == HyperionResult::Status::CHECK_CODE}) { true }
           end
         end
+        it 'stops after the first match' do
+          stub_typho_response(404)
+          request_and_expect('got 404') do |r|
+            r.when(HyperionResult::Status::TIMED_OUT) { 'timed out' }
+            r.when(300) { 'got 400-level' }
+            r.when(404) { 'got 404' }
+            r.when(400..499) { 'got 400-level' }
+          end
+        end
       end
 
       def request_and_expect(return_value, &block)

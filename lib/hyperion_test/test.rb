@@ -3,7 +3,7 @@ require 'mimic'
 require 'hyperion/headers'
 require 'hyperion/formats'
 require 'uri'
-require 'hyperion-test/fake_server'
+require 'hyperion_test/fake_server'
 
 class Hyperion
   class << self
@@ -56,3 +56,4 @@ class Hyperion
 
   end
 end
+

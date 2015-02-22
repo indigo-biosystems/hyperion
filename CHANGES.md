@@ -61,3 +61,6 @@
 
 ### 0.0.37
 - Pass the HyperionResult to the `when` block, since it won't always be in lexical scope.
+
+### 0.0.38
+- Added superion
