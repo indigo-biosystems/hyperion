@@ -114,6 +114,21 @@ describe Hyperion do
             r.when(->r{r.code == 999 && r.status == HyperionResult::Status::CHECK_CODE}) { true }
           end
         end
+        it 'when a predicate raises an error, it is caught and the predicate does not match' do
+          stub_typho_response(400)
+          request_and_expect(true) do |r|
+            r.when(->r{raise 'oops'}) { false }
+            r.when(400) { true }
+          end
+        end
+        it 'when the action raises an error, it is not caught' do
+          stub_typho_response(400)
+          expect do
+            request_and_expect(true) do |r|
+              r.when(400) { raise 'oops' }
+            end
+          end.to raise_error 'oops'
+        end
         it 'stops after the first match' do
           stub_typho_response(404)
           request_and_expect('got 404') do |r|

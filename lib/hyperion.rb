@@ -102,7 +102,8 @@ class Hyperion
   # @private
   class PredicatingHyperionResult < HyperionResult
     def when(condition, &action)
-      if as_predicate(condition).call(self)
+      pred = as_predicate(condition)
+      if nil_if_error{pred.call(self)}
         @continuation.call(action.call(self))
       end
       nil
@@ -132,6 +133,14 @@ class Hyperion
 
     def range_checker(range)
       ->r{range.include?(r.code)}
+    end
+
+    def nil_if_error
+      begin
+        yield
+      rescue StandardError
+        return nil
+      end
     end
   end
 
