@@ -63,9 +63,8 @@ module Superion
   end
 
   def missing
-    # TODO: will be cleaner when hyperion puts the parsed error on HyperionResult
     proc do |result|
-      result.body.is_a?(Hash) && result.body['errors'] && result.body['errors'].any? && result.body.errors.first['code'] == 'missing'
+      result.body.errors.detect(:code, ErrorInfo::Code::MISSING)
     end
   end
 
@@ -86,27 +85,31 @@ module Superion
   def built_in_handler(project, render)
     proc do |result|
       result.when(HyperionResult::Status::SUCCESS, &Proc.compose(project, render, :body.to_proc))
-      result.when(404, &method(:on_404))
-      result.when(400..499, &method(:on_400))
+      result.when(HyperionResult::Status::BAD_ROUTE, &method(:on_bad_route))
+      result.when(HyperionResult::Status::CLIENT_ERROR, &method(:on_client_error))
     end
   end
 
-  def on_404(response)
+  def on_bad_route(response)
     # TODO: use Hyperion::Error instead
-    body = { 'message' => "Got HTTP 404 for #{response.route}. Is the route implemented?" }
-    report_400(response.route, body)
+    body = ClientErrorResponse.new("Got HTTP 404 for #{response.route}. Is the route implemented?")
+    report_client_error(response.route, body)
   end
 
-  def on_400(response)
-    report_400(response.route, response.body)
+  def on_client_error(response)
+    report_client_error(response.route, response.body)
   end
 
-  def report_400(route, body)
+  def report_client_error(route, body)
     generic_msg = "The request failed: #{route}"
-    raise generic_msg unless body
-    specific_msg = body.is_a?(Hash) ? body['message'] : nil
-    raise "#{generic_msg}: #{body}" unless specific_msg
-    raise specific_msg
+
+    if body.is_a?(ClientErrorResponse)
+      raise body.message
+    elsif body.nil?
+      raise generic_msg
+    else
+      raise "#{generic_msg}: #{body}"
+    end
   end
 
   def fallthrough(result)

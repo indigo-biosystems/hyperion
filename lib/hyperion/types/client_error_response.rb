@@ -12,8 +12,11 @@ class ClientErrorResponse
   end
 
   def self.from_attrs(attrs)
-    message = attrs['message']
-    errors = attrs['errors'].map(&ErrorInfo.method(:from_attrs))
-    self.new(message, errors)
+    Hyperion::Util.nil_if_error do
+      message = attrs['message']
+      return nil if message.blank?
+      errors = (attrs['errors'] || []).map(&ErrorInfo.method(:from_attrs))
+      self.new(message, errors)
+    end
   end
 end

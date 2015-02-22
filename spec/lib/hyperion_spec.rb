@@ -54,6 +54,14 @@ describe Hyperion do
                                        and_return(make_typho_response(200, write({}, :json)))
         Hyperion.request(route, {'c' => 'd'})
       end
+      it 'deserializes 400-level errors to ClientErrorResponse' do
+        allow(Hyperion::Typho).to receive(:request).
+                                       with(uri, {method: method, headers: expected_headers, body: '{"c":"d"}'}).
+                                       and_return(make_typho_response(400, write({'message' => 'oops'}, :json)))
+        result = Hyperion.request(route, {'c' => 'd'})
+        expect(result.body).to be_a ClientErrorResponse
+        expect(result.body.message).to eql 'oops'
+      end
     end
 
     context 'when a block is provided' do

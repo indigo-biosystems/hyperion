@@ -24,14 +24,14 @@ class Hyperion
       end
     end
 
-    def read(bytes, format)
+    def read(bytes, format_or_descriptor)
       return nil if bytes.nil?
-      return bytes if format.nil?
+      return bytes if format_or_descriptor.nil?
 
-      case Formats.get_from(format)
+      case Formats.get_from(format_or_descriptor)
         when :json; read_json(bytes)
         when :protobuf; bytes
-        else; raise "Unsupported format: #{format}"
+        else; raise "Unsupported format: #{format_or_descriptor}"
       end
     end
 

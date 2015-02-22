@@ -12,6 +12,7 @@ require 'oj'
 require 'continuation'
 require 'abstractivator/proc_ext'
 require 'abstractivator/enumerable_ext'
+require 'active_support/core_ext/object/blank'
 
 class Hyperion
   include Headers
@@ -79,14 +80,31 @@ class Hyperion
     make = ->klass do
       # should this use the response 'Content-Type' instead of response_descriptor.format?
       read_body = ->{read(typho_result.body, route.response_descriptor)}
+      status = HyperionResult::Status.method(:from_symbol)
+
       if typho_result.success?
-        klass.new(route, HyperionResult::Status::SUCCESS, typho_result.code, read_body.call)
+        klass.new(route, status[:success], typho_result.code, read_body.call)
+
       elsif typho_result.timed_out?
-        klass.new(route, HyperionResult::Status::TIMED_OUT)
+        klass.new(route, status[:timed_out])
+
       elsif typho_result.code == 0
-        klass.new(route, HyperionResult::Status::NO_RESPONSE)
+        klass.new(route, status[:no_response])
+
+      elsif typho_result.code == 404
+        klass.new(route, status[:bad_route], typho_result.code)
+
+      elsif (400..499).include?(typho_result.code)
+        hash_body = read_body.call
+        err = ClientErrorResponse.from_attrs(hash_body) || hash_body
+        klass.new(route, status[:client_error], typho_result.code, err)
+
+      elsif (500..599).include?(typho_result.code)
+        klass.new(route, status[:server_error], typho_result.code)
+
       else
-        klass.new(route, HyperionResult::Status::CHECK_CODE, typho_result.code, read_body.call)
+        klass.new(route, status[:check_code], typho_result.code, read_body.call)
+
       end
     end
 
@@ -103,7 +121,7 @@ class Hyperion
   class PredicatingHyperionResult < HyperionResult
     def when(condition, &action)
       pred = as_predicate(condition)
-      if nil_if_error{pred.call(self)}
+      if Util.nil_if_error{pred.call(self)}
         @continuation.call(action.call(self))
       end
       nil
@@ -133,14 +151,6 @@ class Hyperion
 
     def range_checker(range)
       ->r{range.include?(r.code)}
-    end
-
-    def nil_if_error
-      begin
-        yield
-      rescue StandardError
-        return nil
-      end
     end
   end
 

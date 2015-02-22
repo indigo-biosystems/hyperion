@@ -65,3 +65,4 @@
 ### 0.0.38
 - Added superion
 - Catch raised errors in handler predicates
+- Read 400-level bodies as ClientErrorResponse

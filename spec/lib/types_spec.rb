@@ -5,8 +5,8 @@ describe HyperionResult do
   describe '#to_s' do
     let!(:route) { RestRoute.new(:get, 'http://somesite.org/foo/bar') }
 
-    def make_result(status)
-      HyperionResult.new(route, status, 432)
+    def make_result(status, code=400)
+      HyperionResult.new(route, status, code)
     end
 
     it 'pretty prints the result' do
@@ -19,8 +19,17 @@ describe HyperionResult do
       msg = "No response: #{route.to_s}"
       expect(make_result(HyperionResult::Status::NO_RESPONSE).to_s).to eql msg
 
+      msg = "HTTP 404: #{route.to_s}"
+      expect(make_result(HyperionResult::Status::BAD_ROUTE, 404).to_s).to eql msg
+
+      msg = "HTTP 400: #{route.to_s}"
+      expect(make_result(HyperionResult::Status::CLIENT_ERROR, 400).to_s).to eql msg
+
+      msg = "HTTP 500: #{route.to_s}"
+      expect(make_result(HyperionResult::Status::SERVER_ERROR, 500).to_s).to eql msg
+
       msg = "HTTP 432: #{route.to_s}"
-      expect(make_result(HyperionResult::Status::CHECK_CODE).to_s).to eql msg
+      expect(make_result(HyperionResult::Status::CHECK_CODE, 432).to_s).to eql msg
     end
   end
 end

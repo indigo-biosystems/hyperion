@@ -50,9 +50,9 @@ describe Hyperion do
       end
 
       it 'serializes the body as json if it is not a string' do
-        arrange([400, {}, {'message' => 'oops'}])
+        arrange([200, {}, {'foo' => 'bar'}])
         act
-        expect(@result.body).to eql({'message' => 'oops'})
+        expect(@result.body).to eql({'foo' => 'bar'})
       end
 
       def arrange(response)

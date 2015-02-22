@@ -3,10 +3,13 @@ class HyperionResult
 
   module Status
     include Enum
+    SUCCESS = 'success'
     TIMED_OUT = 'timed_out'
     NO_RESPONSE = 'no_response'
+    BAD_ROUTE = 'bad_route'
+    CLIENT_ERROR = 'client_error'
+    SERVER_ERROR = 'server_error'
     CHECK_CODE = 'check_code'
-    SUCCESS = 'success'
   end
 
   # @param status [HyperionResult::Status]
@@ -27,7 +30,7 @@ class HyperionResult
         "Timed out: #{route.to_s}"
       when Status::NO_RESPONSE
         "No response: #{route.to_s}"
-      when Status::CHECK_CODE
+      else
         "HTTP #{code}: #{route.to_s}"
     end
   end
