@@ -76,4 +76,8 @@
 ### 0.0.41
 - Fixed ClientErrorResponse#from_attrs
 
+### 0.0.42
+- Made ClientErrorResponse constructor interface less error-prone
+
+
 

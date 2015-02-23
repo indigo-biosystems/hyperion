@@ -4,7 +4,7 @@ class ClientErrorResponse
 
   def initialize(message, *errors)
     @message = message
-    @errors = errors || []
+    @errors = coerce_args_to_array(errors || [])
   end
 
   def as_json(*_args)
@@ -17,6 +17,16 @@ class ClientErrorResponse
       return nil if message.blank?
       errors = (attrs['errors'] || []).map(&ErrorInfo.method(:from_attrs))
       self.new(message, *errors)
+    end
+  end
+
+  private
+
+  def coerce_args_to_array(args)
+    if args.size == 1 && args.first.is_a?(Array)
+      args.first
+    else
+      args
     end
   end
 end
