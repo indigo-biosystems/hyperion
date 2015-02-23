@@ -69,3 +69,7 @@
 
 ### 0.0.39
 - Refactored to appease CodeClimate
+
+### 0.0.40
+- Moved mimic back to being a runtime dependency
+
