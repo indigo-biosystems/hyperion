@@ -1,3 +1,5 @@
+require 'hyperion/headers'
+
 class Hyperion
   module Logger
     include Hyperion::Headers

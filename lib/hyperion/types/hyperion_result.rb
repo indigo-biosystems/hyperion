@@ -1,3 +1,5 @@
+require 'abstractivator/enum'
+
 class HyperionResult
   attr_reader :route, :status, :code, :body
 

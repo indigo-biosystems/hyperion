@@ -66,3 +66,6 @@
 - Added superion
 - Catch raised errors in handler predicates
 - Read 400-level bodies as ClientErrorResponse
+
+### 0.0.39
+- Refactored to appease CodeClimate

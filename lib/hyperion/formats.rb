@@ -1,7 +1,8 @@
 require 'oj'
 require 'hyperion'
 require 'stringio'
-require 'hyperion/logger'
+require 'hyperion/aux/logger'
+require 'abstractivator/enum'
 
 class Hyperion
   module Formats
