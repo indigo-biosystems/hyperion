@@ -73,3 +73,7 @@
 ### 0.0.40
 - Moved mimic back to being a runtime dependency
 
+### 0.0.41
+- Fixed ClientErrorResponse#from_attrs
+
+

@@ -16,7 +16,7 @@ class ClientErrorResponse
       message = attrs['message']
       return nil if message.blank?
       errors = (attrs['errors'] || []).map(&ErrorInfo.method(:from_attrs))
-      self.new(message, errors)
+      self.new(message, *errors)
     end
   end
 end
