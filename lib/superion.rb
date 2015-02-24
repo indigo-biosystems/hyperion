@@ -113,6 +113,11 @@ module Superion
   end
 
   def fallthrough(result)
-    Proc.loose_call(method(:superion_fallthrough), [result]) if respond_to?(:superion_fallthrough, true)
+    if respond_to?(:superion_fallthrough, true)
+      Proc.loose_call(method(:superion_fallthrough), [result])
+    else
+      raise 'Superion error: the response did not match any conditions ' +
+                'and no superion_fallthrough method is defined: ' + result.to_s
+    end
   end
 end

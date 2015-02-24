@@ -79,3 +79,6 @@
 ### 0.0.42
 - Made ClientErrorResponse constructor interface less error-prone
 - Always read client error response as JSON
+
+### 0.0.43
+- Raise an error if superion response falls through and no superion_fallthrough method is defined.
