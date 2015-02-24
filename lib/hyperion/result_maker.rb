@@ -41,7 +41,7 @@ class Hyperion
         klass.new(route, status::BAD_ROUTE, code)
 
       elsif (400..499).include?(code)
-        hash_body = read_body.call
+        hash_body = read(typho_result.body, :json)
         err = ClientErrorResponse.from_attrs(hash_body) || hash_body
         klass.new(route, status::CLIENT_ERROR, code, err)
 

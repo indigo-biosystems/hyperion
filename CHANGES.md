@@ -78,6 +78,4 @@
 
 ### 0.0.42
 - Made ClientErrorResponse constructor interface less error-prone
-
-
-
+- Always read client error response as JSON
