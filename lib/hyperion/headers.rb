@@ -1,3 +1,5 @@
+require 'hyperion/formats'
+
 class Hyperion
   module Headers
 

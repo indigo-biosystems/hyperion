@@ -1,9 +1,5 @@
-require 'hyperion/headers'
-
 class Hyperion
   module Logger
-    include Hyperion::Headers
-
     class << self
       attr_accessor :level
     end
@@ -12,9 +8,9 @@ class Hyperion
       rails_logger_available? ? Rails.logger : default_logger
     end
 
-    def log_request(route, uri)
+    def log_request(route, uri, headers)
       logger.debug "Requesting #{route.method.to_s.upcase} #{uri}"
-      log_headers(route_headers(route))
+      log_headers(headers)
     end
 
     def log_stub(rule)

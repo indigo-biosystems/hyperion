@@ -1,4 +1,7 @@
 require 'hyperion/formats'
+require 'hyperion/dispatching_hyperion_result'
+require 'hyperion/types/hyperion_result'
+require 'hyperion/types/client_error_response'
 
 class Hyperion
   class ResultMaker

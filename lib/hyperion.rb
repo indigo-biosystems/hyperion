@@ -1,12 +1,8 @@
 require 'immutable_struct'
-# Hyperion::Util.require_recursive '.' #TODO: extract the requiring into utils or someplace
 
-# require 'contracts'
-# require 'hyperion/contracts'
-# include Contracts
-# include Hyperion::Contracts
+require 'hyperion/hyperion'
 
-Dir.glob(File.join(File.dirname(__FILE__), 'hyperion/**/*.rb')).each{|path| require_relative(path)}
+Dir.glob(File.join(File.dirname(__FILE__), 'hyperion/types/**/*.rb')).each{|path| require_relative(path)}
 require 'typhoeus'
 require 'oj'
 require 'continuation'

@@ -1,3 +1,5 @@
+require 'hyperion/types/hyperion_uri'
+
 class RestRoute
   attr_reader :method, :uri, :response_descriptor, :payload_descriptor
 

@@ -1,3 +1,9 @@
+require 'hyperion/headers'
+require 'hyperion/formats'
+require 'hyperion/aux/logger'
+require 'hyperion/aux/typho'
+require 'hyperion/result_maker'
+
 class Hyperion
   include Headers
   include Formats
@@ -25,7 +31,7 @@ class Hyperion
     all_headers = route_headers(route).merge(additional_headers)
 
     uri = transform_uri(route.uri).to_s
-    log_request(route, uri)
+    log_request(route, uri, route_headers(route))
     typho_result = Typho.request(uri,
                                  method: route.method,
                                  headers: all_headers,

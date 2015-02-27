@@ -53,7 +53,7 @@ class Hyperion
           rd = rule.rest_route.response_descriptor
           [200, {'Content-Type' => content_type_for(rd)}, write(response, rd)]
         else
-          fail "An 'allow' block must return a rack-style response if it was not passed a RestRoute"
+          [500, {}, "An 'allow' block must return a rack-style response if it was not passed a RestRoute"]
         end
       end
     end

@@ -1,5 +1,4 @@
 require 'oj'
-require 'hyperion'
 require 'stringio'
 require 'hyperion/aux/logger'
 require 'abstractivator/enum'

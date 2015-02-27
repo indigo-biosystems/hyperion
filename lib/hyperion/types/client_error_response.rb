@@ -1,3 +1,6 @@
+require 'hyperion/types/error_info'
+require 'hyperion/aux/util'
+
 class ClientErrorResponse
   attr_reader :message  # [String]            An error message that can be presented to the user
   attr_reader :errors   # [Array<ErrorInfo>]  Structured information with error specifics

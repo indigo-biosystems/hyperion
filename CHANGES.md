@@ -82,3 +82,6 @@
 
 ### 0.0.43
 - Raise an error if superion response falls through and no superion_fallthrough method is defined.
+
+### 0.0.44
+- Fixed "require" problems
