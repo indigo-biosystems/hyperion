@@ -88,3 +88,6 @@
 
 ### 0.0.45
 - Support query params that are arrays
+
+### 0.0.46
+- Allow query to be nil (bugfix)

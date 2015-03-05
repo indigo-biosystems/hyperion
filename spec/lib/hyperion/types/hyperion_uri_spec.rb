@@ -69,6 +69,7 @@ describe HyperionUri do
     expect_query_error({a: {b: 1}}, not_simple)
     expect_query_error({a: [1, [2, 3]]}, not_simple)
     expect_query_error({a: [{b: 1}, {b: 2}]}, not_simple)
+    expect{HyperionUri.new('http://yum.com:44/res', nil)}.to_not raise_error
   end
 
   def expect_query_error(query, expected_error)
