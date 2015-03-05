@@ -85,3 +85,6 @@
 
 ### 0.0.44
 - Fixed "require" problems
+
+### 0.0.45
+- Support query params that are arrays
