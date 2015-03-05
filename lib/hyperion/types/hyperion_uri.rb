@@ -2,29 +2,17 @@ require 'uri'
 require 'delegate'
 require 'active_support/core_ext/hash/keys'
 require 'rack/utils'
+require 'abstractivator/array_ext'
 
 class HyperionUri < SimpleDelegator
   attr_accessor :query_hash
 
-  def initialize(*args)
-    init = proc do |uri, query_hash|
-      @uri = uri
-      __setobj__(@uri)
-      query_from_uri = parse_query(uri.query || '')
-      additional_query_params = validate_query(query_hash).stringify_keys
-      @query_hash = query_from_uri.merge(additional_query_params)
-    end
-
-    if args.size <= 2
-      uri, query_hash = *args
-      uri = uri.is_a?(HyperionUri) ? uri.to_s : uri
-      query_hash ||= {}
-      init.call(make_ruby_uri(uri), query_hash)
-    else
-      scheme = args.first
-      klass = scheme == 'https' ? URI::HTTPS : URI::HTTP
-      init.call(klass.new(*args), nil)
-    end
+  def initialize(uri, query_hash={})
+    @uri = make_ruby_uri(uri)
+    query_from_uri = parse_query(@uri.query)
+    additional_query_params = validate_query(query_hash)
+    @query_hash = query_from_uri.merge(additional_query_params)
+    __setobj__(@uri)
   end
 
   def query
@@ -62,7 +50,7 @@ class HyperionUri < SimpleDelegator
   def validate_query(query)
     query.is_a?(Hash) or raise 'query must be a hash'
     query.values.all?(&method(:simple_value?)) or raise 'query values must be simple'
-    query
+    query.stringify_keys
   end
 
   def simple_value?(x)
@@ -77,12 +65,13 @@ class HyperionUri < SimpleDelegator
   end
 
   def parse_query(query)
+    query ||= ''
     Rack::Utils.parse_nested_query(query)
   end
 
   def query_string(query_hash)
     return nil if query_hash == {}
-    sorted = Hash[query_hash.map{|(k, v)| [k.to_s, stringify(v)]}.sort_by{|(k, v)| k}]
+    sorted = query_hash.map{|(k, v)| [k.to_s, stringify(v)]}.sort_by(&:key).to_h
     Rack::Utils.build_nested_query(sorted)
   end
 
@@ -91,10 +80,12 @@ class HyperionUri < SimpleDelegator
   end
 
   def make_ruby_uri(x)
+    input = x.is_a?(HyperionUri) ? x.to_s : x
+
     # URI is an oddball. It's a module but also a method on Kernel.
     # Since this class is a SimpleDelegator and SimpleDelegator is
     # a BasicObject, we need to pick the method off of Kernel.
     # We don't want to include Kernel because that would mess up delegation.
-    Kernel.instance_method(:URI).bind(self).call(x)
+    Kernel.instance_method(:URI).bind(self).call(input)
   end
 end
