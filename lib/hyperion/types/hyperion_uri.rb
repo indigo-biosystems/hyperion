@@ -1,6 +1,7 @@
 require 'uri'
 require 'delegate'
 require 'active_support/core_ext/hash/keys'
+require 'rack/utils'
 
 class HyperionUri < SimpleDelegator
   attr_accessor :query_hash
@@ -9,13 +10,15 @@ class HyperionUri < SimpleDelegator
     init = proc do |uri, query_hash|
       @uri = uri
       __setobj__(@uri)
-      @query_hash = parse_query(uri.query || '').merge(query_hash.stringify_keys)
+      query_from_uri = parse_query(uri.query || '')
+      additional_query_params = validate_query(query_hash).stringify_keys
+      @query_hash = query_from_uri.merge(additional_query_params)
     end
 
     if args.size <= 2
       uri, query_hash = *args
-      query_hash ||= {}
       uri = uri.is_a?(HyperionUri) ? uri.to_s : uri
+      query_hash ||= {}
       init.call(make_ruby_uri(uri), query_hash)
     else
       scheme = args.first
@@ -56,18 +59,35 @@ class HyperionUri < SimpleDelegator
 
   private
 
-  def parse_query(query)
-    Hash[query.split('&').map(&method(:parse_attr))]
+  def validate_query(query)
+    query.is_a?(Hash) or raise 'query must be a hash'
+    query.values.all?(&method(:simple_value?)) or raise 'query values must be simple'
+    query
   end
 
-  def parse_attr(field_and_value)
-    f, v = field_and_value.split('=')
-    [f, URI.decode_www_form_component(v)]
+  def simple_value?(x)
+    case x
+      when Array; x.all?(&method(:primitive_value?))
+      else; primitive_value?(x)
+    end
+  end
+
+  def primitive_value?(x)
+    x.is_a?(String) || x.is_a?(Numeric) || x.is_a?(Symbol)
+  end
+
+  def parse_query(query)
+    Rack::Utils.parse_nested_query(query)
   end
 
   def query_string(query_hash)
     return nil if query_hash == {}
-    query_hash.stringify_keys.sort_by{|(k, v)| k}.map{|(k, v)| "#{k.to_s}=#{URI.encode_www_form_component(v)}"}.join('&')
+    sorted = Hash[query_hash.map{|(k, v)| [k.to_s, stringify(v)]}.sort_by{|(k, v)| k}]
+    Rack::Utils.build_nested_query(sorted)
+  end
+
+  def stringify(x)
+    x.is_a?(Array) ? x.map(&:to_s) : x.to_s
   end
 
   def make_ruby_uri(x)

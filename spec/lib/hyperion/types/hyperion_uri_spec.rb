@@ -56,6 +56,25 @@ describe HyperionUri do
     expect(u.query).to eql 'a=2&b=1'
   end
 
+  it 'supports query params with array values' do
+    u = HyperionUri.new('http://yum.com:44/res?c[]=6&c[]=7', {a: 5, b: [1, '2', :three]})
+    expect(u.query).to eql 'a=5&b[]=1&b[]=2&b[]=three&c[]=6&c[]=7'
+  end
+
+  it 'raises an error when an invalid query is provided' do
+    not_a_hash = 'query must be a hash'
+    not_simple = 'query values must be simple'
+    expect_query_error(1, not_a_hash)
+    expect_query_error([], not_a_hash)
+    expect_query_error({a: {b: 1}}, not_simple)
+    expect_query_error({a: [1, [2, 3]]}, not_simple)
+    expect_query_error({a: [{b: 1}, {b: 2}]}, not_simple)
+  end
+
+  def expect_query_error(query, expected_error)
+    expect{HyperionUri.new('http://yum.com:44/res', query)}.to raise_error expected_error
+  end
+
   describe '#initialize' do
     it 'accepts strings' do
       u = HyperionUri.new('http://yum.com')
