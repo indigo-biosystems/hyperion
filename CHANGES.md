@@ -95,3 +95,6 @@
 ### 0.0.47
 - Fixed slow POSTs > 1KB
 
+### 0.0.48
+- Fixed bug where superion's interface was too loose
+

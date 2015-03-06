@@ -100,6 +100,12 @@ describe Superion do
   #   end
   # end
 
+  it 'rejects invalid arguments' do
+    arrange(:get, {'a' => 'b'})
+    expect{request(:foo)}.to raise_error 'You passed me :foo, which is not a RestRoute'
+    expect{request(@route, :foo)}.to raise_error 'You passed me :foo, which is not an options hash'
+  end
+
   context 'by default' do
     context 'on a 400-level response' do
 

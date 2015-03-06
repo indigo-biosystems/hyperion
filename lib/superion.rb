@@ -47,6 +47,9 @@ module Superion
   # @yield [rendered] Yields to allow an additional transformation.
   #   Only called on HTTP 200.
   def request(route, opts={}, &project)
+    guard_param(route, RestRoute, 'a RestRoute')
+    guard_param(opts, Hash, 'an options hash')
+
     body = opts[:body]
     additional_handler_hash = opts[:also_handle] || {}
     render = opts[:render] || Proc.identity
@@ -69,6 +72,10 @@ module Superion
   end
 
   private
+
+  def guard_param(value, expected_type, what)
+    value.is_a?(expected_type) or raise "You passed me #{value.inspect}, which is not #{what}"
+  end
 
   def hash_handler(hash)
     proc do |result|
