@@ -14,8 +14,7 @@ class Hyperion
     end
 
     def write(obj, format)
-      return obj if obj.is_a?(String) || obj.nil?
-      return obj if format.nil?
+      return obj if obj.is_a?(String) || obj.nil? || format.nil?
 
       case Formats.get_from(format)
         when :json; write_json(obj)
@@ -24,14 +23,14 @@ class Hyperion
       end
     end
 
-    def read(bytes, format_or_descriptor)
+    def read(bytes, format)
       return nil if bytes.nil?
-      return bytes if format_or_descriptor.nil?
+      return bytes if format.nil?
 
-      case Formats.get_from(format_or_descriptor)
+      case Formats.get_from(format)
         when :json; read_json(bytes)
         when :protobuf; bytes
-        else; raise "Unsupported format: #{format_or_descriptor}"
+        else; raise "Unsupported format: #{format}"
       end
     end
 
@@ -68,9 +67,7 @@ class Hyperion
 end
 
 module TimeAsJsonShim
-  class << self
-    attr_accessor :hyperion_mode
-  end
+  mattr_accessor :hyperion_mode
 
   def as_json(*)
     if TimeAsJsonShim.hyperion_mode

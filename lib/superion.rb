@@ -94,6 +94,7 @@ module Superion
       result.when(HyperionResult::Status::SUCCESS, &Proc.compose(project, render, :body.to_proc))
       result.when(HyperionResult::Status::BAD_ROUTE, &method(:on_bad_route))
       result.when(HyperionResult::Status::CLIENT_ERROR, &method(:on_client_error))
+      result.when(HyperionResult::Status::SERVER_ERROR, &method(:on_server_error))
     end
   end
 
@@ -117,6 +118,10 @@ module Superion
     else
       raise "#{generic_msg}: #{body}"
     end
+  end
+
+  def on_server_error(response)
+    raise "#{response.route}/n#{response.body}"
   end
 
   def fallthrough(result)

@@ -7,7 +7,6 @@ class RestRoute
   # @param uri [String, URI]
   # @param response_descriptor [ResponseDescriptor]
   # @param payload_descriptor [PayloadDescriptor]
-  # Contract Symbol, Or[String, URI], Or[ResponseDescriptor, nil], Or[PayloadDescriptor, nil] => Any
   def initialize(method, uri, response_descriptor=nil, payload_descriptor=nil)
     @method = method
     @uri = HyperionUri.new(uri)

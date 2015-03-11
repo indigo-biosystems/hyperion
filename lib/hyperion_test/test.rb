@@ -12,7 +12,6 @@ class Hyperion
     include TestFrameworkHooks
     include Logger
 
-    # Contract Or[String, URI] => Any
     def fake(base_uri, &routes)
       base_uri = HyperionUri.new(base_uri).base # normalize it
       if !@running

@@ -7,11 +7,11 @@ class ClientErrorResponse
 
   def initialize(message, *errors)
     @message = message
-    @errors = coerce_args_to_array(errors || [])
+    @errors = coerce_args_to_array(errors)
   end
 
   def as_json(*_args)
-    {'message' => message, 'errors' => errors.map(&:as_json)}
+    { 'message' => message, 'errors' => errors.map(&:as_json) }
   end
 
   def self.from_attrs(attrs)
@@ -26,7 +26,9 @@ class ClientErrorResponse
   private
 
   def coerce_args_to_array(args)
-    if args.size == 1 && args.first.is_a?(Array)
+    if args.nil?
+      []
+    elsif args.size == 1 && args.first.is_a?(Array)
       args.first
     else
       args

@@ -19,13 +19,13 @@ describe HyperionResult do
       msg = "No response: #{route.to_s}"
       expect(make_result(HyperionResult::Status::NO_RESPONSE).to_s).to eql msg
 
-      msg = "HTTP 404: #{route.to_s}"
+      msg = "Bad route (404): #{route.to_s}"
       expect(make_result(HyperionResult::Status::BAD_ROUTE, 404).to_s).to eql msg
 
-      msg = "HTTP 400: #{route.to_s}"
+      msg = "Client error: #{route.to_s}"
       expect(make_result(HyperionResult::Status::CLIENT_ERROR, 400).to_s).to eql msg
 
-      msg = "HTTP 500: #{route.to_s}"
+      msg = "Server error: #{route.to_s}"
       expect(make_result(HyperionResult::Status::SERVER_ERROR, 500).to_s).to eql msg
 
       msg = "HTTP 432: #{route.to_s}"

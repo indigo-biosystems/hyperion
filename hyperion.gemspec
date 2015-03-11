@@ -24,7 +24,6 @@ Gem::Specification.new do |spec|
 
   spec.add_runtime_dependency 'abstractivator', '>= 0.0.16'
   spec.add_runtime_dependency 'activesupport'
-  spec.add_runtime_dependency 'contracts', '0.5'
   spec.add_runtime_dependency 'immutable_struct', '>= 1.1.1'
   spec.add_runtime_dependency 'oj', '>= 2.11.1'
   spec.add_runtime_dependency 'typhoeus', '>= 0.6.9'
