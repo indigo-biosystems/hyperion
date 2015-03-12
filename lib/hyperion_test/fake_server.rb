@@ -85,6 +85,7 @@ class Hyperion
       cased_header = header.upcase.gsub('-', '_')
       case cased_header
         when 'ACCEPT'; 'HTTP_ACCEPT'
+        when 'EXPECT'; 'HTTP_EXPECT'
         when 'HOST'; 'HTTP_HOST'
         when 'USER_AGENT'; 'HTTP_USER_AGENT'
         else; cased_header

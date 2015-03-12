@@ -18,7 +18,8 @@ describe Hyperion do
       expected_headers = {
           'Accept' => "application/vnd.indigobio-ascent.#{rd.type}-v#{rd.version}+#{rd.format}",
           'Content-Type' => 'application/x-protobuf',
-          'From' => 'dev@indigobio.com'
+          'From' => 'dev@indigobio.com',
+          'Expect' => 'x'
       }
 
       expect(Hyperion::Typho).to receive(:request).
@@ -41,7 +42,8 @@ describe Hyperion do
       let!(:route){RestRoute.new(method, uri, rd, pd)}
       let!(:expected_headers){{
           'Accept' => "application/vnd.indigobio-ascent.#{rd.type}-v#{rd.version}+#{rd.format}",
-          'Content-Type' => 'application/json'
+          'Content-Type' => 'application/json',
+          'Expect' => 'x'
       }}
       it 'deserializes the response' do
         allow(Hyperion::Typho).to receive(:request).and_return(make_typho_response(200, '{"a":"b"}'))

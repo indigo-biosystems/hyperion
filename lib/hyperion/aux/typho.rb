@@ -1,9 +1,9 @@
 class Hyperion
-  # all Typhoeus interation goes through this module for mocking purposes
+  # all Typhoeus interation goes through this module
+  # for maintenance and mocking purposes
   class Typho
-    def self.request(base_url, options = {})
-      # puts "Typho::request(#{base_url}, #{options})"
-      Typhoeus::Request.new(base_url, options).run
+    def self.request(uri, options={})
+      Typhoeus::Request.new(uri, options).run
     end
   end
 end

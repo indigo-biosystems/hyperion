@@ -7,6 +7,9 @@ class Hyperion
       headers = {}
       rd = route.response_descriptor
       pd = route.payload_descriptor
+      headers['Expect'] = 'x' # this overrides default libcurl behavior.
+                              # see http://devblog.songkick.com/2012/11/27/a-second-here-a-second-there/
+                              # the value has to be non-empty or else it's ignored
       if rd
         headers['Accept'] = "application/vnd.indigobio-ascent.#{short_mimetype(rd)}"
       end

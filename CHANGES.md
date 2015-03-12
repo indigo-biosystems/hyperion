@@ -91,3 +91,7 @@
 
 ### 0.0.46
 - Allow query to be nil (bugfix)
+
+### 0.0.47
+- Fixed slow POSTs > 1KB
+
