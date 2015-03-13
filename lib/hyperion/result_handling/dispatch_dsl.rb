@@ -7,10 +7,13 @@ class Hyperion
   module DispatchDsl
     def when(condition, &action)
       pred = as_predicate(condition)
-      if Util.nil_if_error{pred.call(self)}
-        @escape.call(action.call(self))
+      is_match = Util.nil_if_error { Proc.loose_call(pred, [self]) }
+      if is_match
+        return_value = action.call(self)
+        @escape.call(return_value)
+      else
+        nil
       end
-      nil
     end
 
     def __set_escape_continuation__(k)

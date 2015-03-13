@@ -124,6 +124,12 @@ describe Hyperion do
             r.when(->r{r.code == 999 && r.status == HyperionResult::Status::CHECK_CODE}) { true }
           end
         end
+        it 'the predicate can be arity 0' do
+          stub_typho_response(999)
+          request_and_expect(123) do |r|
+            r.when(->{true}) { 123 }
+          end
+        end
         it 'when a predicate raises an error, it is caught and the predicate does not match' do
           stub_typho_response(400)
           request_and_expect(true) do |r|
