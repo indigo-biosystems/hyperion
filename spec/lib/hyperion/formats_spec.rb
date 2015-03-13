@@ -36,7 +36,7 @@ class Hyperion
               expect(write({'a' => time}, :json)).to be_json_eql '{"a":"2015-02-13T13:40:20.321Z"}'
             end
             it 'preserves default behavior for non-hyperion code' do
-              expect(Oj.dump({'a' => time})).to be_json_eql '{"a":{"^t":1423834820.321}}'
+              expect(Oj.dump({'a' => time})).to eql '{"a":{"^t":1423834820.321000000e-18000}}'
             end
           end
         end
