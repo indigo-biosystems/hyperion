@@ -1,14 +1,12 @@
 require 'abstractivator/enum'
 
 class ErrorInfo
-  module Code
-    include Enum
-    MISSING = 'missing'                  # the resource does not exist
-    MISSING_FIELD = 'missing_field'      # a required field on a resource has not been set ()
-    INVALID = 'invalid'                  # a parameter or the content of a POSTed document/field is invalid
-    UNSUPPORTED = 'unsupported'          # an unsupported message type, message version, or format was requested
-    ALREADY_EXISTS = 'already_exists'    # another resource has the same unique key
-  end
+  define_enum :Code,
+              :missing,            # the resource does not exist
+              :missing_field,      # a required field on a resource has not been set ()
+              :invalid,            # a parameter or the content of a POSTed document/field is invalid
+              :unsupported,        # an unsupported message type, message version, or format was requested
+              :already_exists      # another resource has the same unique key
 
   attr_reader :code      # [ErrorInfo::Code]  type of error
   attr_reader :resource  # [String]           the thing with the error

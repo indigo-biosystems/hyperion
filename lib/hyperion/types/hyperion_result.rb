@@ -4,16 +4,15 @@ require 'abstractivator/enum'
 class HyperionResult
   attr_reader :route, :status, :code, :body
 
-  module Status
-    include Enum
-    SUCCESS      = 'success'
-    TIMED_OUT    = 'timed_out'
-    NO_RESPONSE  = 'no_response'
-    BAD_ROUTE    = 'bad_route'     # 404 (route not implemented)
-    CLIENT_ERROR = 'client_error'  # 400
-    SERVER_ERROR = 'server_error'  # 500
-    CHECK_CODE   = 'check_code'    # everything else
-  end
+  define_enum :Status,
+              :success,
+              :timed_out,
+              :no_response,
+              :bad_route,        # 404 (route not implemented)
+              :client_error,     # 400
+              :server_error,     # 500
+              :check_code        # everything else
+
 
   # @param status [HyperionResult::Status]
   # @param code [Integer] the HTTP response code

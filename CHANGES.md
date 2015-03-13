@@ -99,3 +99,5 @@
 - Fixed bug where superion's interface was too loose
 - Do not require dispatch predicates to take an argument
 - Log when requests complete
+
+### 0.0.49

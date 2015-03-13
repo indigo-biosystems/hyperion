@@ -23,7 +23,7 @@ class Hyperion
     private
 
     def as_predicate(condition)
-      if HyperionResult::Status.values.include?(condition)
+      if condition.enum_type == HyperionResult::Status
         status_checker(condition)
       elsif condition.is_a?(Integer)
         code_checker(condition)

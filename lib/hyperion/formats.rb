@@ -7,11 +7,7 @@ class Hyperion
   module Formats
     include Hyperion::Logger
 
-    module Known
-      include Enum
-      JSON = :json
-      PROTOBUF = :protobuf
-    end
+    define_enum :Known, :json, :protobuf
 
     def write(obj, format)
       return obj if obj.is_a?(String) || obj.nil? || format.nil?
