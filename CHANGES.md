@@ -98,3 +98,4 @@
 ### 0.0.48
 - Fixed bug where superion's interface was too loose
 - Do not require dispatch predicates to take an argument
+- Log when requests complete

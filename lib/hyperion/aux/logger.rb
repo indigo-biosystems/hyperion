@@ -8,9 +8,15 @@ class Hyperion
       rails_logger_available? ? Rails.logger : default_logger
     end
 
-    def log_request(route, uri, headers)
-      logger.debug "Requesting #{route.method.to_s.upcase} #{uri}"
-      log_headers(headers)
+    def with_request_logging(route, uri, headers)
+      log_request_start(route, uri, headers)
+      start = Time.now
+      begin
+        yield
+      ensure
+        stop = Time.now
+        log_request_end(((stop - start) * 1000).round)
+      end
     end
 
     def log_stub(rule)
@@ -20,6 +26,16 @@ class Hyperion
     end
 
     private
+
+    def log_request_start(route, uri, headers)
+      logger.debug "Requesting #{route.method.to_s.upcase} #{uri}"
+      log_headers(headers)
+    end
+
+    def log_request_end(ms)
+      logger.debug "Completed in #{ms}ms"
+      logger.debug ''
+    end
 
     def rails_logger_available?
       Kernel.const_defined?(:Rails) && !Rails.logger.nil?
@@ -33,7 +49,6 @@ class Hyperion
 
     def log_headers(headers)
       headers.each_pair { |k, v| logger.debug "    #{k}: #{v}" }
-      logger.debug '' if headers.any?
     end
   end
 end

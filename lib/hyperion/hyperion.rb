@@ -29,12 +29,13 @@ class Hyperion
   # @private
   def request(body=nil, additional_headers={}, &block)
     uri = transform_uri(route.uri).to_s
-    log_request(route, uri, route_headers(route))
-    typho_result = Typho.request(uri,
-                                 method: route.method,
-                                 headers: build_headers(additional_headers),
-                                 body: write(body, route.payload_descriptor))
-    hyperion_result_for(typho_result, block)
+    with_request_logging(route, uri, route_headers(route)) do
+      typho_result = Typho.request(uri,
+                                   method: route.method,
+                                   headers: build_headers(additional_headers),
+                                   body: write(body, route.payload_descriptor))
+      hyperion_result_for(typho_result, block)
+    end
   end
 
   private
