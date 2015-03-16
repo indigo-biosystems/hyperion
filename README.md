@@ -1,19 +1,52 @@
 # Hyperion
 
 Hyperion is a Ruby REST client that follows certain conventions
-layered on top of HTTP. The conventions implement best practices.
-Hyperion provides an abstraction that makes it easy to follow these
-conventions consistently across projects.
+layered on top of HTTP. The conventions implement best practices
+surrounding versioning, error handling, and making an API consumable
+by third parties. Hyperion provides an abstraction that makes it easy
+to follow these conventions consistently across projects.
 
 ## Conventions
 
 ### Versioning
 
-TBD
+_TODO_
 
 ### Errors
 
-## Using it
+400-level errors are always return as exactly 400; no distinction is
+made in the error code. Instead, a well-defined structure is returned
+that contains
+
+- a human-oriented error message, and
+- a machine-oriented list of `ErrorInfo`s.
+
+The point of the message is to describe the problem. The point of the
+error infos is to provide enough information necessary to begin
+resolving the problem.
+
+An `ErrorInfo` consists of:
+
+- code
+- resource
+- field
+- value
+- reason
+
+As of this writing, allowable codes are
+
+- 'missing'
+- 'missing_field'
+- 'invalid'
+- 'unsupported'
+- 'already_exists'
+
+Each field is a string. Depending on the code, some fields may not
+apply. Inapplicable fields are always present, with the empty string
+as their value. This simplifies the code that deals with them.
+
+
+## Using hyperion
 
 Hyperion revolves around the idea of a _route_, which is a combination of:
 
@@ -36,11 +69,10 @@ Hyperion provides a basic interface for requesting routes.
 ```ruby
 require 'hyperion'
 
-route = RestRoute.new(:get, 'http://somesite.org/users/0', ResponseDescriptor.new('user', 1, :json))
+route = RestRoute.new(:get, 'http://somesite.org/users/0',
+                      ResponseDescriptor.new('user', 1, :json))
 result = Hyperion.request(route)
 ```
-
-(Example of organizing routes, like AssaymaticRoutes)
 
 You can pass `request` a block, in which case the return value of the
 block becomes the return value of `request`.
@@ -53,7 +85,7 @@ user = Hyperion.request(route) do |result|
 end
 ```
 
-Production quality error handling becomes hairy quickly, so hyperion
+Production-quality error handling becomes hairy quickly, so hyperion
 provides a mini DSL to make it easier. Conditions are tested in order.
 When the first true condition is encountered, the associated block is
 executed and becomes the return value of `request`.
@@ -87,20 +119,53 @@ raises an exception is treated as a non-match. In the example above,
 if the body didn't have a 'things' key, then the predicate would not
 match, and hyperion would move on to the next predicate, if any.
 
-Other examples:
+Configuration:
 
 ```ruby
-# POST
-route = RestRoute.new(:post, 'http://somesite.org/users',
-                      ResponseDescriptor.new('user', 1, :json),
-                      PayloadDescriptor.new(:json))
-result = Hyperion.request(route, body: {name: 'joe', email: 'joe@schmoe.com'})
-
 # configure hyperion
 Hyperion.configure do |config|
   config.vendor_string = 'indigobio-ascent'  # becomes part of the Accept header
 end
 ```
+
+In practice, you don't want to litter your code with `RestRoute.new`
+invocations. Here is a pattern for encapsulating the routes. It is the
+client-side analog of `routes.rb`.
+
+```ruby
+class CrudRoutes
+  def initialize(resource)
+    @resource = resource
+  end
+
+  def read(id)
+    build(:get, id, response(message_type_for(@resource), 1, :json))
+  end
+
+  def create
+    build(:post, '', response(message_type_for(@resource), 1, :json), payload(:json))
+  end
+
+  ...
+end
+```
+
+You can easily imagine the rest of the routes and what the helper
+methods `build`, `message_type_for`, `response`, and `payload` look like.
+
+```ruby
+user_routes = CrudRoutes.new('users')
+Hyperion.request(user_routes.create, body: {name: 'joe', email: 'joe@schmoe.com'})
+# later...
+joe = Hyperion.request(user_routes.read(joes_id))
+```
+
+A few notes:
+
+_TODO: comment on testing_
+
+_TODO: comment on DRYing_
+
 
 ### Superion
 
@@ -145,7 +210,7 @@ Superion has three levels of dispatching:
 - includer, and
 - request.
 
-_TBD: these terms could use improvement._
+_TODO: these terms could use improvement._
 
 They are distinguished by their scope. The core handler is built into
 superion. An includer handler affects all requests made by a
@@ -232,3 +297,12 @@ fake_route(list_route, response)
 ```
 
 See the specs for details.
+
+### Design decisions
+
+Hyperion is backed by Typhoeus, which is turn is backed by libcurl.
+Both are fully featured, have widespread adoption, and are actively
+maintained. One particularly nice feature of Typhoeus is that it
+provides an easy way to issue multiple requests in parallel, which
+is important when you have a microservices architecture.
+
