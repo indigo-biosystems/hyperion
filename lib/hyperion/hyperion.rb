@@ -9,6 +9,8 @@ class Hyperion
   include Formats
   include Logger
 
+  Config = Struct.new(:vendor_string)
+
   # @param route [RestRoute]
   # @param body [String] the body to send with POST or PUT
   # @param additional_headers [Hash] headers to send in addition to the ones
@@ -38,9 +40,17 @@ class Hyperion
     end
   end
 
+  def self.configure
+    yield(config)
+  end
+
   private
 
   attr_reader :route
+
+  def self.config
+    @config ||= Config.new('indigobio-ascent')
+  end
 
   def build_headers(additional_headers)
     route_headers(route).merge(additional_headers)

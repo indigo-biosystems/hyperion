@@ -11,7 +11,7 @@ class Hyperion
                               # see http://devblog.songkick.com/2012/11/27/a-second-here-a-second-there/
                               # the value has to be non-empty or else it is ignored
       if rd
-        headers['Accept'] = "application/vnd.indigobio-ascent.#{short_mimetype(rd)}"
+        headers['Accept'] = "application/vnd.#{Hyperion.config.vendor_string}.#{short_mimetype(rd)}"
       end
       if pd
         headers['Content-Type'] = content_type_for(pd.format)

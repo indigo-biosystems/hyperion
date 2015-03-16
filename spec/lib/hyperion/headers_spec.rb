@@ -1,16 +1,22 @@
 require 'hyperion'
 require 'hyperion/headers'
 
-
 class Hyperion
   describe Headers do
     include Headers
+
+    before :each do
+      Hyperion.configure do |config|
+        config.vendor_string = 'schmindigo-descent'
+      end
+    end
+
     let!(:uri){'http://somesite.org'}
 
     describe '#route_headers' do
       it 'creates an accept header for the response descriptor' do
         headers = route_headers(RestRoute.new(:get, uri, ResponseDescriptor.new('ttt', 999, :json)))
-        expect(headers['Accept']).to eql 'application/vnd.indigobio-ascent.ttt-v999+json'
+        expect(headers['Accept']).to eql 'application/vnd.schmindigo-descent.ttt-v999+json'
       end
       it 'creates a content-type header for the payload descriptor' do
         headers = route_headers(RestRoute.new(:get, uri, ResponseDescriptor.new('ttt', 999, :json), PayloadDescriptor.new(:json)))

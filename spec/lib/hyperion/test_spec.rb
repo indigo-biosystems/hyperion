@@ -1,9 +1,14 @@
 require 'spec_helper'
 require 'hyperion_test'
 
-
 describe Hyperion do
   include Hyperion::Formats
+
+  before :each do
+    Hyperion.configure do |config|
+      config.vendor_string = 'indigobio-ascent'
+    end
+  end
 
   let(:user_response_params) { ResponseDescriptor.new('user', 1, :json) }
 
