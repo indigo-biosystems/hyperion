@@ -92,7 +92,7 @@ module Superion
 
   def built_in_handler(project, render)
     proc do |result|
-      result.when(HyperionResult::Status::SUCCESS, &Proc.compose(project, render, :body.to_proc))
+      result.when(HyperionResult::Status::SUCCESS, &Proc.pipe(:body, render, project))
       result.when(HyperionResult::Status::BAD_ROUTE, &method(:on_bad_route))
       result.when(HyperionResult::Status::CLIENT_ERROR, &method(:on_client_error))
       result.when(HyperionResult::Status::SERVER_ERROR, &method(:on_server_error))
