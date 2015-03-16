@@ -118,6 +118,13 @@ describe Hyperion do
             r.when(HyperionResult::Status::TIMED_OUT) { true }
           end
         end
+        it 'matches client error codes' do
+          response = ClientErrorResponse.new('oops', ErrorInfo.new(ErrorInfo::Code::MISSING, 'thing'))
+          stub_typho_response(400, false, response)
+          request_and_expect(true) do |r|
+            r.when(ErrorInfo::Code::MISSING) { true }
+          end
+        end
         it 'matches arbitrary predicates' do
           stub_typho_response(999)
           request_and_expect(true) do |r|
@@ -161,8 +168,8 @@ describe Hyperion do
       end
     end
 
-    def stub_typho_response(code, timed_out=false)
-      allow(Hyperion::Typho).to receive(:request).and_return(make_typho_response(code, write({}, :json), timed_out))
+    def stub_typho_response(code, timed_out=false, response={})
+      allow(Hyperion::Typho).to receive(:request).and_return(make_typho_response(code, write(response, :json), timed_out))
     end
 
     def make_typho_response(code, body, timed_out=false)

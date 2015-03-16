@@ -100,4 +100,5 @@
 - Do not require dispatch predicates to take an argument
 - Log when requests complete
 
-### 0.0.49
+### 0.0.50
+- Allow dispatching on client error code

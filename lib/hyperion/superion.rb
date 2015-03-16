@@ -65,6 +65,7 @@ module Superion
     end
   end
 
+  # PW: deprecate
   def missing
     proc do |result|
       result.body.errors.detect(:code, ErrorInfo::Code::MISSING)

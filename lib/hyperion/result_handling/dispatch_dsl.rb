@@ -1,5 +1,6 @@
 require 'hyperion/aux/util'
 require 'hyperion/types/hyperion_result'
+require 'hyperion/types/error_info'
 
 class Hyperion
   # This is a DSL of sorts that gives the `request` block a nice way
@@ -26,12 +27,19 @@ class Hyperion
     def as_predicate(condition)
       if condition.enum_type == HyperionResult::Status
         status_checker(condition)
+
+      elsif condition.enum_type == ErrorInfo::Code
+        client_error_code_checker(condition)
+
       elsif condition.is_a?(Integer)
-        code_checker(condition)
+        http_code_checker(condition)
+
       elsif condition.is_a?(Range)
         range_checker(condition)
-      elsif condition.respond_to?(:call)
+
+      elsif condition.callable?
         condition
+
       else
         fail "Not a valid condition: #{condition.inspect}"
       end
@@ -41,7 +49,14 @@ class Hyperion
       proc { |r| r.status == status }
     end
 
-    def code_checker(code)
+    def client_error_code_checker(code)
+      proc do |r|
+        r.status == HyperionResult::Status::CLIENT_ERROR &&
+            r.body.errors.detect(:code, code)
+      end
+    end
+
+    def http_code_checker(code)
       proc { |r| r.code == code }
     end
 
