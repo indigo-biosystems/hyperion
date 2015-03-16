@@ -1,16 +1,34 @@
 require 'superion'
 require 'hyperion_test'
+require 'ostruct'
+require 'hyperion/types/hyperion_error'
 
-# class PointEntity < Entity
-#   custom_accessor :x
-#   custom_accessor :y
-# end
+class ClassWithSuperionHandlers
+  include Superion
+
+  def initialize(predetermined_result)
+    @predetermined_result = predetermined_result
+  end
+
+  def superion_handler(result)
+    result.when(->{true}) { @predetermined_result }
+  end
+end
+
+class ClassWithSuperionFallthrough
+  include Superion
+
+  def initialize(predetermined_result)
+    @predetermined_result = predetermined_result
+  end
+
+  def superion_fallthrough(result)
+    result.when(->{true}) { @predetermined_result }
+  end
+end
 
 describe Superion do
   include Superion
-
-  # attr_reader :superion_handlers
-  # before(:each) { @superion_handlers = {} }
 
   def arrange(method, response)
     @route = RestRoute.new(method, 'http://indigo.com/things',
@@ -40,65 +58,64 @@ describe Superion do
     expect(@request.body).to eql({'the' => 'body'})
   end
 
-  # uses Entity. fix.
-  # it 'renders the response as an entity' do
-  #   arrange(:get, {'x' => 1, 'y' => 2})
-  #   @result = request(@route, render: as(PointEntity))
-  #   assert_result(PointEntity.new(x: 1, y: 2))
-  # end
-  #
-  # uses Entity. fix.
-  # it 'renders the response as multiple entities' do
-  #   arrange(:get, [{'x' => 1, 'y' => 2}, {'x' => 3, 'y' => 4}])
-  #   @result = request(@route, render: as_many(PointEntity))
-  #   assert_result([PointEntity.new(x: 1, y: 2), PointEntity.new(x: 3, y: 4)])
-  # end
+  it 'renders the response with the render proc' do
+    arrange(:get, {'x' => 1, 'y' => 2})
+    @result = request(@route, render: OpenStruct.method(:new))
+    assert_result(OpenStruct.new(x: 1, y: 2))
+  end
 
-  # broken, fix later
-  # it 'uses handlers returned by a `superion_handlers` method, if present' do
-  #   arrange(:get, [444, {}, nil])
-  #   @superion_handlers = {444 => 'got 444'}
-  #   @result = request(@route)
-  #   expect(@result).to eql 'got 444'
-  # end
+  context 'when a `superion_handlers` method is defined' do
+    it 'takes precedence over the core handlers' do
+      arrange(:get, [200, {}, nil])
+      superion_handler_result = double
+      route = @route
+      @result = ClassWithSuperionHandlers.new(superion_handler_result).instance_eval do
+        request(route)
+      end
+      assert_result(superion_handler_result)
+    end
+  end
 
-  # broken, fix later
-  # it 'superion_handlers overrides the default handlers' do
-  #   arrange(:get, [444, {}, nil])
-  #   @superion_handlers = {400..499 => 'got 400-level'}
-  #   @result = request(@route)
-  #   expect(@result).to eql 'got 400-level'
-  # end
+  context 'when request handlers are provided' do
+    it 'earlier handlers take precedence over later ones' do
+      arrange(:get, [333, {}, nil])
+      custom_handlers = {
+          proc {|x| x.code.odd?} => 'odd',
+          333 => 'got 333'
+      }
 
-  # broken, fix later
-  # it 'earlier handlers take precedence over later ones' do
-  #   arrange(:get, [333, {}, nil])
-  #   @superion_handlers = {
-  #       proc {|x|
-  #         x.code.odd?
-  #       } => 'odd',
-  #       333 => 'got 333' }
-  #
-  #   @result = request(@route)
-  #   expect(@result).to eql 'odd'
-  # end
+      @result = request(@route, also_handle: custom_handlers)
+      assert_result('odd')
+    end
+  end
 
-  # uses Entity. fix.
-  # context 'when given a block' do
-  #   before :each do
-  #     arrange(:get, {'x' => 1, 'y' => 2})
-  #     @result = request(@route, render: as(PointEntity)) do |point|
-  #       @point = point
-  #       :block_result
-  #     end
-  #   end
-  #   it 'passes the rendered response to the block' do
-  #     expect(@point).to be_a PointEntity
-  #   end
-  #   it "returns the block's return value" do
-  #     expect(@result).to eql :block_result
-  #   end
-  # end
+  context 'when a `superion_fallthrough` method is defined' do
+    it 'receives results that were not handled by any handlers' do
+      arrange(:get, [300, {}, nil])
+      fallthrough_result = double
+      route = @route
+      @result = ClassWithSuperionFallthrough.new(fallthrough_result).instance_eval do
+        request(route)
+      end
+      assert_result(fallthrough_result)
+    end
+  end
+
+  context 'when given a block' do
+    before :each do
+      arrange(:get, {'x' => 1, 'y' => 2})
+      @result = request(@route, render: OpenStruct.method(:new)) do |point|
+        @point = point
+        :block_result
+      end
+    end
+    it 'passes the rendered response to the block' do
+      expect(@point).to be_an OpenStruct
+    end
+    it "returns the block's return value" do
+      expect(@result).to eql :block_result
+    end
+  end
 
   it 'rejects invalid arguments' do
     arrange(:get, {'a' => 'b'})
@@ -111,7 +128,7 @@ describe Superion do
 
       def example(opts)
         arrange(:get, [(400..499).to_a.sample, {}, opts[:response]])
-        expect{request(@route)}.to raise_error opts[:error]
+        expect{request(@route)}.to raise_error HyperionError, opts[:error]
       end
 
       context 'when the response is a properly-formed error message' do
@@ -131,6 +148,27 @@ describe Superion do
           example response: nil,
                   error: 'The request failed: GET http://indigo.com/things'
         end
+      end
+    end
+
+    context 'on a 404 response' do
+      it 'raises an error' do
+        arrange(:get, [404, {}, nil])
+        expect{request(@route)}.to raise_error HyperionError, "Got HTTP 404 for #{@route}. Is the route implemented?"
+      end
+    end
+
+    context 'on a 500-level response' do
+      it 'raises an error' do
+        arrange(:get, [(500..599).to_a.sample, {}, {'a' => 1}])
+        expect{request(@route)}.to raise_error HyperionError, "#{@route}\n{\"a\"=>1}"
+      end
+    end
+
+    context 'when a result falls through and a superion_fallthrough method is not defined' do
+      it 'raises an error' do
+        arrange(:get, [(300..399).to_a.sample, {}, nil])
+        expect{request(@route)}.to raise_error HyperionError, /no superion_fallthrough method is defined/
       end
     end
   end

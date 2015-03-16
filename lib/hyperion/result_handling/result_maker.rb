@@ -54,7 +54,7 @@ class Hyperion
         result_class.new(route, status::CLIENT_ERROR, code, err)
 
       elsif (500..599).include?(code)
-        result_class.new(route, status::SERVER_ERROR, code)
+        result_class.new(route, status::SERVER_ERROR, code, read_body.call)
 
       else
         result_class.new(route, status::CHECK_CODE, code, read_body.call)

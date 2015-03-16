@@ -100,7 +100,6 @@ module Superion
   end
 
   def on_bad_route(response)
-    # TODO: use Hyperion::Error instead
     body = ClientErrorResponse.new("Got HTTP 404 for #{response.route}. Is the route implemented?")
     report_client_error(response.route, body)
   end
