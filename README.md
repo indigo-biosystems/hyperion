@@ -2,9 +2,13 @@
 
 Hyperion is a Ruby REST client that follows certain conventions
 layered on top of HTTP. The conventions implement best practices
-surrounding versioning, error handling, and making an API consumable
-by third parties. Hyperion provides an abstraction that makes it easy
-to follow these conventions consistently across projects.
+surrounding versioning, error handling, and crafting an API for
+consumption by third parties. Hyperion provides abstractions that
+make it easy to follow these conventions consistently across
+projects.
+
+This document describes the conventions, then demonstrates how to
+use the API, and finally shows how to test your client-side code.
 
 ## Conventions
 
@@ -14,7 +18,7 @@ _TODO_
 
 ### Errors
 
-400-level errors are always return as exactly 400; no distinction is
+400-level errors are always returned as exactly 400; no distinction is
 made in the error code. Instead, a well-defined structure is returned
 that contains
 
@@ -22,8 +26,8 @@ that contains
 - a machine-oriented list of `ErrorInfo`s.
 
 The point of the message is to describe the problem. The point of the
-error infos is to provide enough information necessary to begin
-resolving the problem.
+error infos is to provide enough information to begin resolving the
+problem.
 
 An `ErrorInfo` consists of:
 
@@ -48,7 +52,8 @@ as their value. This simplifies the code that deals with them.
 
 ## Using hyperion
 
-Hyperion revolves around the idea of a _route_, which is a combination of:
+Hyperion's API revolves around the idea of a _route_, which is a
+combination of:
 
 - HTTP method
 - URI
@@ -62,16 +67,13 @@ Hyperion automatically deserializes responses according to the
 `ResponseDescriptor` and serializes the request payload according to
 the `PayloadDescriptor`.
 
-### Hyperion
-
 Hyperion provides a basic interface for requesting routes.
 
 ```ruby
 require 'hyperion'
 
-route = RestRoute.new(:get, 'http://somesite.org/users/0',
-                      ResponseDescriptor.new('user', 1, :json))
-result = Hyperion.request(route)
+route = RestRoute.new(:get, 'http://somesite.org/users/0', ResponseDescriptor.new('user', 1, :json))
+user = Hyperion.request(route)
 ```
 
 You can pass `request` a block, in which case the return value of the
@@ -86,10 +88,7 @@ end
 ```
 
 Production-quality error handling becomes hairy quickly, so hyperion
-provides a mini DSL to make it easier. Conditions are tested in order.
-When the first true condition is encountered, the associated block is
-executed and becomes the return value of `request`.
-
+provides a mini DSL to make it easier.
 
 ```ruby
 Hyperion.request(route) do |result|
@@ -101,10 +100,14 @@ end
 
 def evil
   proc do |result|
-    result.body['things'].any?{|x| x['id'] == 666}
+    result.body['things'].any?{|x| x['id'] == '666'}
   end
 end
 ```
+
+Conditions are tested in order. When hyperion encounters the first
+true condition, it executes the associated block, the value of which
+becomes the return value of `request`.
 
 A condition may be:
 
@@ -114,19 +117,13 @@ A condition may be:
 - a range of HTTP codes, or
 - an arbitrary predicate.
 
-To obviate copious structural tests in predicates, a predicate that
-raises an exception is treated as a non-match. In the example above,
-if the body didn't have a 'things' key, then the predicate would not
-match, and hyperion would move on to the next predicate, if any.
+To obviate guard logic in predicates, a predicate that raises an
+exception is treated as a non-match. In the example above, if the body
+didn't have a `'things'` key, then `.any?` would raise a
+`NoMethodError`, interpreted as a non-match, and hyperion would move
+on to the next predicate.
 
-Configuration:
-
-```ruby
-# configure hyperion
-Hyperion.configure do |config|
-  config.vendor_string = 'indigobio-ascent'  # becomes part of the Accept header
-end
-```
+### Route classes
 
 In practice, you don't want to litter your code with `RestRoute.new`
 invocations. Here is a pattern for encapsulating the routes. It is the
@@ -153,6 +150,8 @@ end
 You can easily imagine the rest of the routes and what the helper
 methods `build`, `message_type_for`, `response`, and `payload` look like.
 
+Use it like this:
+
 ```ruby
 user_routes = CrudRoutes.new('users')
 Hyperion.request(user_routes.create, body: {name: 'joe', email: 'joe@schmoe.com'})
@@ -167,10 +166,22 @@ _TODO: comment on testing_
 _TODO: comment on DRYing_
 
 
-### Superion
+### Configuration
+
+```ruby
+# configure hyperion
+Hyperion.configure do |config|
+  config.vendor_string = 'indigobio-ascent'  # becomes part of the Accept header
+end
+```
+
+
+## Superion
 
 Superion layers more convenience onto Hyperion by helping dispatch the
 response: rendering the response as an entity and dealing with errors.
+
+### Render and project
 
 ```ruby
 require 'superion'
@@ -191,48 +202,61 @@ class UserGateway
 end
 ```
 
-On success, the 'render' proc has a chance to transform the body
-(usually a Hash) into an internal representation (often an entity).
+On success, the "render" proc has a chance to transform the body
+(usually a `Hash`) into an internal representation (often an entity).
 
-After rendering, a 'project' proc (the block) has a chance to project
+After rendering, a "project" proc (the block) has a chance to project
 the rendered entity; for example, by choosing a subdocument or field.
 
 ```ruby
 def user_names
   route = RestRoute.new(:get, "http://somesite.org/users")
-  user = request(route, render: as_users) { |users| users.map(&:name) }
+  request(route, render: as_users) do |users|
+    users.map(&:name)
+  end
 end
 ```
 
+### Result dispatch
+
 Superion has three levels of dispatching:
 
-- core,
-- includer, and
-- request.
+- _core_,
+- _includer_, and
+- _request_.
 
-_TODO: these terms could use improvement._
+_TODO: these terms could use improvement. Suggestions?_
 
 They are distinguished by their scope. The core handler is built into
 superion. An includer handler affects all requests made by a
-particular class. A request handler affects a particular request.
+particular class. A request handler affects only a particular request.
 
 When superion receives a response, it passes the result through the
 request, includer, and core handlers, in that order. The first handler
 to match wins, and no further handlers are tried. If no handler
 matches, then superion invokes the fallthrough handler.
 
-The core handler handles the success case, and 400- and 500-level
+#### Core
+
+The core handler handles the 200 success case and 400- and 500-level
 errors. In the success case, the body is rendered and projected. In
 the error cases, a `HyperionError` is raised. The message for 400s is
 taken from the error response. The message for 500s contains the raw
-string body. Specifically for 404, no body is available, so a special
-error indicating an unimplemented route is raised in that case.
+string body. Specifically for 404, no body is available, so an error
+indicating an unimplemented route is raised.
+
+
+#### Includer
 
 The includer handler is an optional method on the requesting class.
 
 ```ruby
 class UserGateway
   include Superion
+
+  def find(id)
+    ...
+  end
 
   def superion_handler(result)
     result.when(ErrorInfo::MISSING) { raise "The resource was not found: #{result.route}" }
@@ -241,9 +265,11 @@ class UserGateway
 end
 ```
 
+#### Request
+
 The request handler provides a convenient way to specify a handler as
-a Hash for an individual `request` call. If a `superion_handler` looks
-like:
+a `Hash` for an individual `request` call. If a `superion_handler`
+looks like:
 
 ```ruby
 result.when(condition) { return_something }
@@ -261,6 +287,8 @@ Pass it as the `also_handle` option:
   request(route, render: as_user, also_handle: { condition => proc { return_something } })
 ```
 
+#### Fallthrough
+
 The fallthrough handler is an optional method in the requesting class.
 
 ```ruby
@@ -270,9 +298,11 @@ end
 ```
 
 If a result falls through and no `superion_fallthrough` method is
-defined, an `HyperionError` is raised. 
+defined, a `HyperionError` is raised. 
 
-### Testing
+## Testing
+
+Hyperion includes methods to help test your client-side code.
 
 ```ruby
 require 'hyperion_test'
@@ -280,27 +310,37 @@ require 'hyperion_test'
 list_route = RestRoute.new(:get, "http://somesite.org/users")
 find_route = RestRoute.new(:get, "http://somesite.org/users/123")
 
+# start a fake server
 Hyperion.fake('http://somesite.org') do |svr|
-  svr.allow(list_route) { [User.new('123'), User.new('123')].as_json }
+  svr.allow(list_route) { [User.new('123'), User.new('456')].as_json }
   svr.allow(find_route) do |result|
     User.new(result.body['id']).as_json
   end
 end
+
+# then place requests against it
+users = Hyperion.request(list_route)
+expect(users[0]['id']).to eql 123
+expect(users[1]['id']).to eql 456
 ```
+
+`Hyperion::fake` starts a real web server which responds to the
+configured routes. It provides an easy way to exercise the entire
+stack when running your tests.
 
 For simpler cases:
 
 ```ruby
 list_route = RestRoute.new(:get, "http://somesite.org/users")
-response = [User.new('123'), User.new('123')]
+response = [User.new('123'), User.new('456')]
 fake_route(list_route, response)
 ```
 
 See the specs for details.
 
-### Design decisions
+## Design decisions
 
-Hyperion is backed by Typhoeus, which is turn is backed by libcurl.
+Hyperion is backed by Typhoeus, which in turn is backed by libcurl.
 Both are fully featured, have widespread adoption, and are actively
 maintained. One particularly nice feature of Typhoeus is that it
 provides an easy way to issue multiple requests in parallel, which

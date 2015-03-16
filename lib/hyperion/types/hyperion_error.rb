@@ -1,4 +1,4 @@
-class HyperionError < StandardError
+class HyperionError < RuntimeError
 end
 
 def hyperion_raise(msg)
