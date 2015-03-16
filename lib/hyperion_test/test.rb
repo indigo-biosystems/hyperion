@@ -7,13 +7,16 @@ require 'hyperion_test/fake_server'
 
 class Hyperion
   class << self
+    # maintains a collection of fake servers, one for each base_uri.
+    # manages rspec integration for automatic teardown after each test.
+
     include Formats
     include Headers
     include TestFrameworkHooks
     include Logger
 
     def fake(base_uri, &routes)
-      base_uri = HyperionUri.new(base_uri).base # normalize it
+      base_uri = normalized_base(base_uri)
       if !@running
         hook_teardown if can_hook_teardown? && !teardown_registered?
         @running = true
@@ -22,7 +25,7 @@ class Hyperion
     end
 
     def teardown
-      servers.values.each{|s| s.teardown}
+      servers.values.each(&:teardown)
       servers.clear
       @running = false
     end
@@ -40,9 +43,13 @@ class Hyperion
 
     private
 
-    # redirect normal Hyperion requests to the appropriate fake server
+    def normalized_base(uri)
+      HyperionUri.new(uri).base
+    end
+
+    # hook into the production code so we can redirect requests to the appropriate fake server
     def transform_uri(uri)
-      server_uri = servers.keys.detect{|server_uri| HyperionUri.new(server_uri).base == uri.base}
+      server_uri = servers.keys.detect{|server_uri| normalized_base(server_uri) == uri.base}
       if server_uri
         new_uri = HyperionUri.new(uri)
         new_uri.base = "http://localhost:#{servers[server_uri].port}"

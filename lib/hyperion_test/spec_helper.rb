@@ -1,5 +1,7 @@
 require 'hyperion_test'
 
+# a simple wrapper around Hyperion::fake for the typical
+# use case of one faked route.
 def fake_route(route, return_value=nil, &block)
   if return_value && block
     fail 'cannot provide both a return_value and block'
