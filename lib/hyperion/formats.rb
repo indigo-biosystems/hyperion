@@ -5,6 +5,9 @@ require 'abstractivator/enum'
 
 class Hyperion
   module Formats
+    # Serializes and deserializes the supported formats.
+    # This is done as gracefully as possible.
+
     include Hyperion::Logger
 
     define_enum :Known, :json, :protobuf

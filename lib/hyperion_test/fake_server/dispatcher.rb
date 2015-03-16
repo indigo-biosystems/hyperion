@@ -3,6 +3,8 @@ require 'hyperion/headers'
 class Hyperion
   class FakeServer
     class Dispatcher
+      # Directs an incoming request to the correct handler
+
       include Hyperion::Formats
       include Hyperion::Headers
 

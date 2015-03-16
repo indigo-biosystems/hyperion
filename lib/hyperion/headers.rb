@@ -2,6 +2,7 @@ require 'hyperion/formats'
 
 class Hyperion
   module Headers
+    # constructs and destructures HTTP headers
 
     def route_headers(route)
       headers = {}

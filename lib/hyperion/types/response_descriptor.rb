@@ -1,6 +1,8 @@
 require 'hyperion/headers'
 
 class ResponseDescriptor
+  # Describes properties of an acceptable response
+
   include Hyperion::Headers
 
   attr_reader :type, :version, :format

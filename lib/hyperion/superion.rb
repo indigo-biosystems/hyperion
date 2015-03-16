@@ -1,38 +1,5 @@
 require 'hyperion'
 
-# A hyperion interface that abstracts common usage patterns.
-#
-# On success, a 'render' proc has a chance to transform the body
-# (usually a Hash) into an internal representation (often an entity).
-# After rendering, a 'project' proc has a chance to project the entity;
-# for example, by choosing a subdocument or field.
-#
-# There are three layers of error handling: core, includer, and request.
-#
-# The core handler handles the success case, 400-level errors, and 500-level
-# errors. When the response is 400-level, the core handler reads the body as a
-# ClientErrorResponse object. Specifically for 404, the body is not
-# available, so a special error indicating an unimplemented route is
-# raised in that case.
-#
-# The includer handler is a 'superion_handler' method implemented by
-# the including class/module. This method has the same contract as
-# the block passed to Hyperion::request. See the hyperion specs for
-# an example.
-#
-# The request handler provides a convenient way to specify a handler
-# as a Hash for an individual `request` call. If a `superion_handler`
-# looks like:
-#   request.when(condition) { return_something }
-#
-# then the request handler looks like
-#
-#   { condition => proc { return_something } }
-#
-# First the request handler runs, then the includer handler, then the
-# core handler. Thus, specific handlers override generic ones.
-# Finally, if no handlers matched, the includer's 'superion_fallthrough'
-# method is called.
 module Superion
 
   # @param [RestRoute] route The route to request

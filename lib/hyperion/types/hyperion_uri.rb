@@ -5,6 +5,11 @@ require 'rack/utils'
 require 'abstractivator/array_ext'
 
 class HyperionUri < SimpleDelegator
+  # An enhanced version of URI. Namely,
+  # - the base uri is a first class citizen,
+  # - it accepts a hash containing query key/values, and
+  # - it form-encodes query values that are arrays.
+
   attr_accessor :query_hash
 
   def initialize(uri, query_hash={})
