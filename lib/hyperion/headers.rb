@@ -9,7 +9,7 @@ class Hyperion
       pd = route.payload_descriptor
       headers['Expect'] = 'x' # this overrides default libcurl behavior.
                               # see http://devblog.songkick.com/2012/11/27/a-second-here-a-second-there/
-                              # the value has to be non-empty or else it's ignored
+                              # the value has to be non-empty or else it is ignored
       if rd
         headers['Accept'] = "application/vnd.indigobio-ascent.#{short_mimetype(rd)}"
       end
@@ -35,7 +35,7 @@ class Hyperion
 
     def format_for(content_type)
       ct = ContentTypes.detect{|x| x.last == content_type}
-      raise "Unsupported content type: #{content_type}" unless ct
+      fail "Unsupported content type: #{content_type}" unless ct
       ct.first
     end
   end

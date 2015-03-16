@@ -1,3 +1,5 @@
+require 'hyperion/headers'
+
 class ResponseDescriptor
   include Hyperion::Headers
 

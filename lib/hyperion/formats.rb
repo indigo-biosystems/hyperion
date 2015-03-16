@@ -15,7 +15,7 @@ class Hyperion
       case Formats.get_from(format)
         when :json; write_json(obj)
         when :protobuf; obj
-        else; raise "Unsupported format: #{format}"
+        else; fail "Unsupported format: #{format}"
       end
     end
 
@@ -26,7 +26,7 @@ class Hyperion
       case Formats.get_from(format)
         when :json; read_json(bytes)
         when :protobuf; bytes
-        else; raise "Unsupported format: #{format}"
+        else; fail "Unsupported format: #{format}"
       end
     end
 

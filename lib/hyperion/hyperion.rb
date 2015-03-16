@@ -27,14 +27,14 @@ class Hyperion
   end
 
   # @private
-  def request(body=nil, additional_headers={}, &block)
+  def request(body=nil, additional_headers={}, &dispatch)
     uri = transform_uri(route.uri).to_s
     with_request_logging(route, uri, route_headers(route)) do
       typho_result = Typho.request(uri,
                                    method: route.method,
                                    headers: build_headers(additional_headers),
                                    body: write(body, route.payload_descriptor))
-      hyperion_result_for(typho_result, block)
+      hyperion_result_for(typho_result, dispatch)
     end
   end
 
@@ -46,12 +46,12 @@ class Hyperion
     route_headers(route).merge(additional_headers)
   end
 
-  def hyperion_result_for(typho_result, block)
+  def hyperion_result_for(typho_result, dispatch)
     result_maker = ResultMaker.new(route)
-    if block
+    if dispatch
       # callcc allows control to "jump" back here when the first predicate matches
       callcc do |cont|
-        block.call(result_maker.make(typho_result, cont))
+        dispatch.call(result_maker.make(typho_result, cont))
       end
     else
       result_maker.make(typho_result)

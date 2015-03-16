@@ -49,8 +49,8 @@ class HyperionUri < SimpleDelegator
 
   def validate_query(query)
     query ||= {}
-    query.is_a?(Hash) or raise 'query must be a hash'
-    query.values.all?(&method(:simple_value?)) or raise 'query values must be simple'
+    query.is_a?(Hash) or fail 'query must be a hash'
+    query.values.all?(&method(:simple_value?)) or fail 'query values must be simple'
     query.stringify_keys
   end
 

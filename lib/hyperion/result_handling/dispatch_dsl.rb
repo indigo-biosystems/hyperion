@@ -5,19 +5,20 @@ class Hyperion
   # This is a DSL of sorts that gives the `request` block a nice way
   # to dispatch the result based on status, HTTP code, etc.
   module DispatchDsl
+
+    def __set_escape_continuation__(k)
+      @escape = k
+    end
+
     def when(condition, &action)
       pred = as_predicate(condition)
       is_match = Util.nil_if_error { Proc.loose_call(pred, [self]) }
       if is_match
         return_value = action.call(self)
-        @escape.call(return_value)
+        @escape.call(return_value)  # non-local exit
       else
         nil
       end
-    end
-
-    def __set_escape_continuation__(k)
-      @escape = k
     end
 
     private
@@ -31,6 +32,8 @@ class Hyperion
         range_checker(condition)
       elsif condition.respond_to?(:call)
         condition
+      else
+        fail "Not a valid condition: #{condition.inspect}"
       end
     end
 
