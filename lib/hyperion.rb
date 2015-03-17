@@ -6,6 +6,7 @@ require 'continuation'
 require 'abstractivator/proc_ext'
 require 'abstractivator/enumerable_ext'
 require 'active_support/core_ext/object/blank'
+require 'active_support/core_ext/object/try'
 require 'active_support/core_ext/module/attribute_accessors'
 
 # ensure the requirer gets everything (except hyperion_test)

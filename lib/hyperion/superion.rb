@@ -6,7 +6,7 @@ module Superion
   # @option opts [Object] :body The payload to POST/PUT. Usually a Hash or Array.
   # @option opts [Hash<predicate, transformer>] :also_handle Additional handlers to
   #   use besides the default handlers. A predicate is an integer HTTP code, an
-  #   integer Range of HTTP codes, a HyperionResult::Status enumeration value,
+  #   integer Range of HTTP codes, a HyperionStatus enumeration value,
   #   or a predicate proc. A transformer is a procedure which accepts a
   #   HyperionResult and returns the final value to return from `request`
   # @option opts [Proc] :render A transformer, usually a proc returned by
@@ -14,8 +14,8 @@ module Superion
   # @yield [rendered] Yields to allow an additional transformation.
   #   Only called on HTTP 200.
   def request(route, opts={}, &project)
-    guard_param(route, RestRoute, 'a RestRoute')
-    guard_param(opts, Hash, 'an options hash')
+    Hyperion::Util.guard_param(route, 'a RestRoute', RestRoute)
+    Hyperion::Util.guard_param(opts, 'an options hash', Hash)
 
     body = opts[:body]
     additional_handler_hash = opts[:also_handle] || {}
@@ -35,15 +35,11 @@ module Superion
   # PW: deprecate
   def missing
     proc do |result|
-      result.body.errors.detect(:code, ErrorInfo::Code::MISSING)
+      result.body.errors.detect(:code, ClientErrorCode::MISSING)
     end
   end
 
   private
-
-  def guard_param(value, expected_type, what)
-    value.is_a?(expected_type) or fail "You passed me #{value.inspect}, which is not #{what}"
-  end
 
   def hash_handler(hash)
     proc do |result|
@@ -59,15 +55,15 @@ module Superion
 
   def built_in_handler(project, render)
     proc do |result|
-      result.when(HyperionResult::Status::SUCCESS, &Proc.pipe(:body, render, project))
-      result.when(HyperionResult::Status::BAD_ROUTE, &method(:on_bad_route))
-      result.when(HyperionResult::Status::CLIENT_ERROR, &method(:on_client_error))
-      result.when(HyperionResult::Status::SERVER_ERROR, &method(:on_server_error))
+      result.when(HyperionStatus::SUCCESS, &Proc.pipe(:body, render, project))
+      result.when(HyperionStatus::BAD_ROUTE, &method(:on_bad_route))
+      result.when(HyperionStatus::CLIENT_ERROR, &method(:on_client_error))
+      result.when(HyperionStatus::SERVER_ERROR, &method(:on_server_error))
     end
   end
 
   def on_bad_route(response)
-    body = ClientErrorResponse.new("Got HTTP 404 for #{response.route}. Is the route implemented?")
+    body = ClientErrorResponse.new("Got HTTP 404 for #{response.route}. Is the route implemented?", [], ClientErrorCode::UNKNOWN)
     report_client_error(response.route, body)
   end
 

@@ -1,6 +1,6 @@
 require 'hyperion/aux/util'
 require 'hyperion/types/hyperion_result'
-require 'hyperion/types/error_info'
+require 'hyperion/types/client_error_detail'
 
 class Hyperion
   # This is a DSL of sorts that gives the `request` block a nice way
@@ -25,10 +25,10 @@ class Hyperion
     private
 
     def as_predicate(condition)
-      if condition.enum_type == HyperionResult::Status
+      if condition.enum_type == HyperionStatus
         status_checker(condition)
 
-      elsif condition.enum_type == ErrorInfo::Code
+      elsif condition.enum_type == ClientErrorCode
         client_error_code_checker(condition)
 
       elsif condition.is_a?(Integer)
@@ -51,7 +51,7 @@ class Hyperion
 
     def client_error_code_checker(code)
       proc do |r|
-        r.status == HyperionResult::Status::CLIENT_ERROR &&
+        r.status == HyperionStatus::CLIENT_ERROR &&
             r.body.errors.detect(:code, code)
       end
     end

@@ -28,7 +28,7 @@ describe Hyperion do
 
       result = Hyperion.request(route, body, additional_headers)
       expect(result).to be_a HyperionResult
-      expect(result.status).to eql HyperionResult::Status::SUCCESS
+      expect(result.status).to eql HyperionStatus::SUCCESS
       expect(result.code).to eql 200
       expect(result.body).to eql({'foo' => 'bar'})
       expect(result.route).to eql route
@@ -57,12 +57,14 @@ describe Hyperion do
         Hyperion.request(route, {'c' => 'd'})
       end
       it 'deserializes 400-level errors to ClientErrorResponse' do
+        client_error = ClientErrorResponse.new('oops', [], ClientErrorCode::MISSING)
         allow(Hyperion::Typho).to receive(:request).
-                                       with(uri, {method: method, headers: expected_headers, body: '{"c":"d"}'}).
-                                       and_return(make_typho_response(400, write({'message' => 'oops'}, :json)))
+                                      with(uri, {method: method, headers: expected_headers, body: '{"c":"d"}'}).
+                                      and_return(make_typho_response(400, write(client_error.as_json, :json)))
         result = Hyperion.request(route, {'c' => 'd'})
         expect(result.body).to be_a ClientErrorResponse
         expect(result.body.message).to eql 'oops'
+        expect(result.body.code).to eql 'missing'
       end
     end
 
@@ -115,20 +117,20 @@ describe Hyperion do
         it 'matches result states' do
           stub_typho_response(999, true)
           request_and_expect(true) do |r|
-            r.when(HyperionResult::Status::TIMED_OUT) { true }
+            r.when(HyperionStatus::TIMED_OUT) { true }
           end
         end
         it 'matches client error codes' do
-          response = ClientErrorResponse.new('oops', ErrorInfo.new(ErrorInfo::Code::MISSING, 'thing'))
+          response = ClientErrorResponse.new('oops', [ClientErrorDetail.new(ClientErrorCode::MISSING, 'thing')])
           stub_typho_response(400, false, response)
           request_and_expect(true) do |r|
-            r.when(ErrorInfo::Code::MISSING) { true }
+            r.when(ClientErrorCode::MISSING) { true }
           end
         end
         it 'matches arbitrary predicates' do
           stub_typho_response(999)
           request_and_expect(true) do |r|
-            r.when(->r{r.code == 999 && r.status == HyperionResult::Status::CHECK_CODE}) { true }
+            r.when(->r{r.code == 999 && r.status == HyperionStatus::CHECK_CODE}) { true }
           end
         end
         it 'the predicate can be arity 0' do
@@ -155,7 +157,7 @@ describe Hyperion do
         it 'stops after the first match' do
           stub_typho_response(404)
           request_and_expect('got 404') do |r|
-            r.when(HyperionResult::Status::TIMED_OUT) { 'timed out' }
+            r.when(HyperionStatus::TIMED_OUT) { 'timed out' }
             r.when(300) { 'got 400-level' }
             r.when(404) { 'got 404' }
             r.when(400..499) { 'got 400-level' }

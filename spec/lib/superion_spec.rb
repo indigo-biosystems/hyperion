@@ -131,6 +131,8 @@ describe Superion do
         expect{request(@route)}.to raise_error HyperionError, opts[:error]
       end
 
+
+
       context 'when the response is a properly-formed error message' do
         it 'raises an error with the response message' do
           example response: '{"message":"oops"}',

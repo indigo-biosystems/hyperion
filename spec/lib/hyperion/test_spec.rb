@@ -215,9 +215,8 @@ describe Hyperion do
   end
 
   def expect_success(result, body)
-    expect(result.status).to eql HyperionResult::Status::SUCCESS
+    expect(result.status).to eql HyperionStatus::SUCCESS
     expect(result.code).to eql 200
     expect(result.body).to eql body
   end
 end
-

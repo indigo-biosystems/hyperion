@@ -48,7 +48,7 @@ class Hyperion
     end
 
     def log_headers(headers)
-      headers.each_pair { |k, v| logger.debug "    #{k}: #{v}" }
+      headers.each_pair { |k, v| logger.debug "    #{k}: #{v}" unless k == 'Expect' }
     end
   end
 end

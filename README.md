@@ -115,7 +115,7 @@ A condition may be:
 - an `ErrorInfo::Code` enumeration member,
 - an HTTP code,
 - a range of HTTP codes, or
-- an arbitrary predicate.
+- an arbitrary [predicate](http://en.wikipedia.org/wiki/Predicate_(mathematical_logic)).
 
 To obviate guard logic in predicates, a predicate that raises an
 exception is treated as a non-match. In the example above, if the body
@@ -179,7 +179,7 @@ end
 ## Superion
 
 Superion layers more convenience onto Hyperion by helping dispatch the
-response: rendering the response as an entity and dealing with errors.
+response: internalizing the response and dealing with errors.
 
 ### Render and project
 
@@ -346,3 +346,6 @@ maintained. One particularly nice feature of Typhoeus is that it
 provides an easy way to issue multiple requests in parallel, which
 is important when you have a microservices architecture.
 
+# Parking Lot
+
+- Consider making the set of supported formats/content-types extensible.

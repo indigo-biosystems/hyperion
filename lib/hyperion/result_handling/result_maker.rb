@@ -33,32 +33,30 @@ class Hyperion
     def make_from_typho(typho_result, result_class)
       # TODO: should this use the response's 'Content-Type' instead of response_descriptor.format?
       read_body = proc { read(typho_result.body, route.response_descriptor) }
-      status = HyperionResult::Status
       code = typho_result.code
 
       if typho_result.success?
-        result_class.new(route, status::SUCCESS, code, read_body.call)
+        result_class.new(route, HyperionStatus::SUCCESS, code, read_body.call)
 
       elsif typho_result.timed_out?
-        result_class.new(route, status::TIMED_OUT)
+        result_class.new(route, HyperionStatus::TIMED_OUT)
 
       elsif code == 0
-        result_class.new(route, status::NO_RESPONSE)
+        result_class.new(route, HyperionStatus::NO_RESPONSE)
 
       elsif code == 404
-        result_class.new(route, status::BAD_ROUTE, code)
+        result_class.new(route, HyperionStatus::BAD_ROUTE, code)
 
       elsif (400..499).include?(code)
         hash_body = read(typho_result.body, :json)
         err = ClientErrorResponse.from_attrs(hash_body) || hash_body
-        result_class.new(route, status::CLIENT_ERROR, code, err)
+        result_class.new(route, HyperionStatus::CLIENT_ERROR, code, err)
 
       elsif (500..599).include?(code)
-        result_class.new(route, status::SERVER_ERROR, code, read_body.call)
+        result_class.new(route, HyperionStatus::SERVER_ERROR, code, read_body.call)
 
       else
-        result_class.new(route, status::CHECK_CODE, code, read_body.call)
-
+        result_class.new(route, HyperionStatus::CHECK_CODE, code, read_body.call)
       end
     end
 

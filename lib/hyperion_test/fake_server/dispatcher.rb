@@ -62,11 +62,11 @@ class Hyperion
         # TODO: there should be a function in Sinatra that does this already
         cased_header = header.upcase.gsub('-', '_')
         case cased_header
-          when 'ACCEPT'; 'HTTP_ACCEPT'
-          when 'EXPECT'; 'HTTP_EXPECT'
-          when 'HOST'; 'HTTP_HOST'
-          when 'USER_AGENT'; 'HTTP_USER_AGENT'
-          else; cased_header
+        when 'ACCEPT'     then 'HTTP_ACCEPT'
+        when 'EXPECT'     then 'HTTP_EXPECT'
+        when 'HOST'       then 'HTTP_HOST'
+        when 'USER_AGENT' then 'HTTP_USER_AGENT'
+        else cased_header
         end
       end
     end

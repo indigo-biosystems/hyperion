@@ -5,10 +5,14 @@ describe ClientErrorResponse do
     it 'creates a ClientErrorResponse from a hash' do
       hash = {
           'message' => 'oops',
-          'errors' => [ make_error_attrs('assay') ]
+          'code' => 'missing',
+          'errors' => [ make_error_attrs('assay') ],
+          'body' => 'stuff'
       }
       result = ClientErrorResponse.from_attrs(hash)
       expect(result.message).to eql 'oops'
+      expect(result.code).to eql 'missing'
+      expect(result.body).to eql 'stuff'
       expect(result.errors.size).to eql 1
       error = result.errors.first
       expect(error.code).to eql 'missing'
@@ -19,25 +23,21 @@ describe ClientErrorResponse do
     end
   end
 
-  describe '::new' do
-    it 'accepts splatted errors' do
-      assert(ClientErrorResponse.new('oops', make_error('one')),
-             %w(one))
-      assert(ClientErrorResponse.new('oops', make_error('one'), make_error('two')),
-             %w(one two))
-    end
-    it 'accepts errors as an array' do
-      assert(ClientErrorResponse.new('oops', [make_error('one'), make_error('two')]),
-             %w(one two))
-    end
-
-    def assert(actual_cer, expected_resources)
-      expect(actual_cer.errors.map(&:resource)).to eql expected_resources
+  describe '::as_json' do
+    it 'converts to a hash' do
+      errors = [ ClientErrorDetail.new(ClientErrorCode::MISSING, 'x'),
+                 ClientErrorDetail.new(ClientErrorCode::INVALID, 'x') ]
+      err = ClientErrorResponse.new('oops', errors, ClientErrorCode::INVALID, 'the_body')
+      result = err.as_json
+      expect(result['message']).to eql 'oops'
+      expect(result['code']).to eql 'invalid'
+      expect(result['body']).to eql 'the_body'
+      expect(result['errors'].map(&['code'])).to eql %w(missing invalid)
     end
   end
 
   def make_error(resource)
-    ErrorInfo.from_attrs(make_error_attrs(resource))
+    ClientErrorDetail.from_attrs(make_error_attrs(resource))
   end
 
   def make_error_attrs(resource)

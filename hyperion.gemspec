@@ -6,10 +6,10 @@ require 'hyperion/aux/version'
 Gem::Specification.new do |spec|
   spec.name          = 'hyperion'
   spec.version       = Hyperion::VERSION
-  spec.authors       = ['Indigo Biosystems, Inc.']
+  spec.authors       = ['Indigo BioAutomation, Inc.']
   spec.email         = ['pwinton@indigobio.com']
   spec.summary       = 'Ruby REST client'
-  spec.description   = 'Ruby REST client for internal Indigo Biosystems service architecture'
+  spec.description   = 'Ruby REST client for internal Indigo BioAutomation service architecture'
   spec.homepage      = ''
   spec.license       = 'MIT'
 
@@ -21,8 +21,10 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'bundler', '~> 1.7'
   spec.add_development_dependency 'rake', '~> 10.0'
   spec.add_development_dependency 'yard'
+  spec.add_development_dependency 'rspec'
+  spec.add_development_dependency 'json_spec'
 
-  spec.add_runtime_dependency 'abstractivator', '>= 0.0.25'
+  spec.add_runtime_dependency 'abstractivator', '>= 0.0.26'
   spec.add_runtime_dependency 'activesupport'
   spec.add_runtime_dependency 'immutable_struct', '>= 1.1.1'
   spec.add_runtime_dependency 'oj', '>= 2.12.1'

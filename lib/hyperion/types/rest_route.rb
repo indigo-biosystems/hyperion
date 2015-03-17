@@ -18,4 +18,3 @@ class RestRoute
     "#{method.to_s.upcase} #{uri}"
   end
 end
-

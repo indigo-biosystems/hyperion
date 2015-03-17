@@ -61,7 +61,6 @@ class Hyperion
       m = e.message.match(/at line (?<line>\d+), column (?<col>\d+)/)
       m ? [m[:line].to_i, m[:col].to_i] : nil
     end
-
   end
 end
 
