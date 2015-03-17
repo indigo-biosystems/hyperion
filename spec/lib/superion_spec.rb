@@ -13,18 +13,6 @@ class ClassWithHyperionHandlers
   end
 end
 
-class ClassWithHyperionFallthrough
-  include Hyperion::Requestor
-
-  def initialize(predetermined_result)
-    @predetermined_result = predetermined_result
-  end
-
-  def hyperion_fallthrough(result)
-    result.when(->{true}) { @predetermined_result }
-  end
-end
-
 describe Hyperion::Requestor do
   include Hyperion::Requestor
 
@@ -84,18 +72,6 @@ describe Hyperion::Requestor do
 
       @result = request(@route, also_handle: custom_handlers)
       assert_result('odd')
-    end
-  end
-
-  context 'when a `hyperion_fallthrough` method is defined' do
-    it 'receives results that were not handled by any handlers' do
-      arrange(:get, [300, {}, nil])
-      fallthrough_result = double
-      route = @route
-      @result = ClassWithHyperionFallthrough.new(fallthrough_result).instance_eval do
-        request(route)
-      end
-      assert_result(fallthrough_result)
     end
   end
 
@@ -165,10 +141,10 @@ describe Hyperion::Requestor do
       end
     end
 
-    context 'when a result falls through and a hyperion_fallthrough method is not defined' do
+    context 'when a result falls through' do
       it 'raises an error' do
         arrange(:get, [(300..399).to_a.sample, {}, nil])
-        expect{request(@route)}.to raise_error HyperionError, /no hyperion_fallthrough method is defined/
+        expect{request(@route)}.to raise_error HyperionError, /response did not match any conditions/
       end
     end
   end

@@ -89,12 +89,7 @@ class Hyperion
     end
 
     def fallthrough(result)
-      if respond_to?(:hyperion_fallthrough, true)
-        Proc.loose_call(method(:hyperion_fallthrough), [result])
-      else
-        hyperion_raise 'Hyperion error: the response did not match any conditions ' +
-                           'and no hyperion_fallthrough method is defined: ' + result.to_s
-      end
+      hyperion_raise "Hyperion error: the response did not match any conditions: #{result.to_s}"
     end
   end
 end

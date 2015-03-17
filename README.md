@@ -234,7 +234,7 @@ particular class. A request handler affects only a particular request.
 When superion receives a response, it passes the result through the
 request, includer, and core handlers, in that order. The first handler
 to match wins, and no further handlers are tried. If no handler
-matches, then superion invokes the fallthrough handler.
+matches, then superion raises a `HyperionError` error.
 
 #### Core
 
@@ -286,19 +286,6 @@ Pass it as the `also_handle` option:
 ```ruby
   request(route, render: as_user, also_handle: { condition => proc { return_something } })
 ```
-
-#### Fallthrough
-
-The fallthrough handler is an optional method in the requesting class.
-
-```ruby
-def superion_fallthrough(result)
-  ...
-end
-```
-
-If a result falls through and no `superion_fallthrough` method is
-defined, a `HyperionError` is raised. 
 
 ## Testing
 
