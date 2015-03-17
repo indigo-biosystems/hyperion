@@ -219,7 +219,7 @@ end
 
 ### Result dispatch
 
-Superion has three levels of dispatching:
+Superion has four levels of dispatching:
 
 - _core_,
 - _includer_, and
@@ -346,6 +346,17 @@ maintained. One particularly nice feature of Typhoeus is that it
 provides an easy way to issue multiple requests in parallel, which
 is important when you have a microservices architecture.
 
+Our original plan was to have a second gem containing `Hyperion.fake`
+and its dependencies. The problem is that you need to keep the two
+gems in sync, which reduces agility. As a compromise, `Hyperion.fake`
+still lives in the hyperion gem but is only loaded when you `require
+'hyperion_test'`. Assuming no production code `require`s
+`hyperion_test`, none of the test-related dependencies will be loaded
+in a production system, although the gem dependencies will be part of
+the production bundle.
+
 # Parking Lot
 
 - Consider making the set of supported formats/content-types extensible.
+- Consider adding a configuration value to set the logger to use. If none
+  is provided, fall back on Rails.logger, and then a new `Logger`.
