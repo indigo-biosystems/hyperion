@@ -16,9 +16,9 @@ class HyperionResult
     if status == HyperionStatus::CHECK_CODE
       "HTTP #{code}: #{route.to_s}"
     elsif status == HyperionStatus::BAD_ROUTE
-      "#{status.to_s.humanize} (#{code}): #{route.to_s}"
+      "#{status.value.to_s.humanize} (#{code}): #{route.to_s}"
     else
-      "#{status.to_s.humanize}: #{route.to_s}"
+      "#{status.value.to_s.humanize}: #{route.to_s}"
     end
   end
 end

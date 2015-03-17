@@ -25,10 +25,10 @@ class Hyperion
     private
 
     def as_predicate(condition)
-      if condition.enum_type == HyperionStatus
+      if condition.try(:enum_type) == HyperionStatus
         status_checker(condition)
 
-      elsif condition.enum_type == ClientErrorCode
+      elsif condition.try(:enum_type) == ClientErrorCode
         client_error_code_checker(condition)
 
       elsif condition.is_a?(Integer)

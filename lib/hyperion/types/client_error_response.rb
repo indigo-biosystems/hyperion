@@ -13,7 +13,7 @@ class ClientErrorResponse
   def initialize(message, errors, code=nil, body=nil)
     Hyperion::Util.guard_param(message, 'a message string', String)
     Hyperion::Util.guard_param(errors, 'an array of errors', &method(:error_array?))
-    code ||= errors.first.try(:code) || ClientErrorCode::UNKNOWN
+    code = ClientErrorCode.from(code || errors.first.try(:code) || ClientErrorCode::UNKNOWN)
     Hyperion::Util.guard_param(code, 'a code') { ClientErrorCode.values.include?(code) }
 
     @message = message
@@ -25,7 +25,7 @@ class ClientErrorResponse
   def as_json(*_args)
     {
         'message' => message,
-        'code' => code,
+        'code' => code.value,
         'errors' => errors.map(&:as_json),
         'body' => body
     }
@@ -34,9 +34,9 @@ class ClientErrorResponse
   def self.from_attrs(attrs)
     Hyperion::Util.nil_if_error do
       message = attrs['message']
-      code = attrs['code']
-      body = attrs['body']
       return nil if message.blank?
+      body = attrs['body']
+      code = code || ClientErrorCode.from(attrs['code'])
       errors = (attrs['errors'] || []).map(&ClientErrorDetail.method(:from_attrs))
       self.new(message, errors, code, body)
     end

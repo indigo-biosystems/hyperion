@@ -64,7 +64,7 @@ describe Hyperion do
         result = Hyperion.request(route, {'c' => 'd'})
         expect(result.body).to be_a ClientErrorResponse
         expect(result.body.message).to eql 'oops'
-        expect(result.body.code).to eql 'missing'
+        expect(result.body.code).to eql ClientErrorCode::MISSING
       end
     end
 

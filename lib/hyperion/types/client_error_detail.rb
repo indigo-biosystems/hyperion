@@ -17,7 +17,7 @@ class ClientErrorDetail
 
   def as_json
     {
-        'code' => code,
+        'code' => code.value,
         'resource' => resource,
         'field' => field,
         'value' => value,
@@ -26,7 +26,7 @@ class ClientErrorDetail
   end
 
   def self.from_attrs(attrs)
-    code = attrs['code']
+    code = ClientErrorCode.from(attrs['code'])
     resource = attrs['resource']
     field = attrs['field']
     value = attrs['value']
@@ -41,6 +41,6 @@ class ClientErrorDetail
   private
 
   def canonical_code(x)
-    x.is_a?(Symbol) ? ClientErrorCode.from_symbol(x) : x
+    x.is_a?(Symbol) ? ClientErrorCode.from_symbol(x) : ClientErrorCode.from(x)
   end
 end

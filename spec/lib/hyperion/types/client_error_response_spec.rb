@@ -11,11 +11,11 @@ describe ClientErrorResponse do
       }
       result = ClientErrorResponse.from_attrs(hash)
       expect(result.message).to eql 'oops'
-      expect(result.code).to eql 'missing'
+      expect(result.code).to eql ClientErrorCode::MISSING
       expect(result.body).to eql 'stuff'
       expect(result.errors.size).to eql 1
       error = result.errors.first
-      expect(error.code).to eql 'missing'
+      expect(error.code).to eql ClientErrorCode::MISSING
       expect(error.resource).to eql 'assay'
       expect(error.field).to eql 'name'
       expect(error.value).to eql 'foo'
