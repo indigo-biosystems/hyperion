@@ -33,7 +33,7 @@ class Hyperion
           context 'when writing times' do
             let!(:time) { Time.parse('2015-02-13 08:40:20.321 -0500') }
             it 'writes Time objects in UTC ISO 8601 format with milliseconds precision' do
-              expect(write({'a' => time}, :json)).to be_json_eql '{"a":"2015-02-13T13:40:20.321Z"}'
+              expect(write({'a' => time}, :json)).to be_json_eql '{"a":"2015-02-13T08:40:20.321-05:00"}'
             end
             it 'preserves default behavior for non-hyperion code' do
               expect(Oj.dump({'a' => time})).to eql '{"a":{"^t":1423834820.321000000e-18000}}'

@@ -16,9 +16,9 @@ class Hyperion
       return obj if obj.is_a?(String) || obj.nil? || format.nil?
 
       case Formats.get_from(format)
-        when :json; write_json(obj)
-        when :protobuf; obj
-        else; fail "Unsupported format: #{format}"
+      when :json; write_json(obj)
+      when :protobuf; obj
+      else; fail "Unsupported format: #{format}"
       end
     end
 
@@ -27,9 +27,9 @@ class Hyperion
       return bytes if format.nil?
 
       case Formats.get_from(format)
-        when :json; read_json(bytes)
-        when :protobuf; bytes
-        else; fail "Unsupported format: #{format}"
+      when :json; read_json(bytes)
+      when :protobuf; bytes
+      else; fail "Unsupported format: #{format}"
       end
     end
 
@@ -40,21 +40,25 @@ class Hyperion
     private
 
     def write_json(obj)
-      begin
-        TimeAsJsonShim.hyperion_mode = true
-        Oj.dump(obj, mode: :compat)
-      ensure
-        TimeAsJsonShim.hyperion_mode = false
-      end
+      Oj.dump(obj, oj_options)
     end
 
     def read_json(bytes)
       begin
-        Oj.compat_load(bytes, mode: :compat)
+        Oj.compat_load(bytes, oj_options)
       rescue Oj::ParseError => e
         logger.error e.message
         bytes
       end
+    end
+
+    def oj_options
+      {
+          mode: :compat,
+          time_format: :xmlschema,  # xmlschema == iso8601
+          use_to_json: false,
+          second_precision: 3
+      }
     end
 
     def get_oj_line_and_col(e)
@@ -62,22 +66,4 @@ class Hyperion
       m ? [m[:line].to_i, m[:col].to_i] : nil
     end
   end
-end
-
-module TimeAsJsonShim
-  mattr_accessor :hyperion_mode
-
-  def as_json(*)
-    if TimeAsJsonShim.hyperion_mode
-      self.utc.iso8601(3)
-    elsif defined? super
-      super
-    else
-      to_s
-    end
-  end
-end
-
-class Time
-  include TimeAsJsonShim
 end
