@@ -1,3 +1,5 @@
+require 'hyperion/types/client_error_code'
+
 class ClientErrorDetail
   attr_reader :code      # [ClientErrorCode]            type of error
   attr_reader :resource  # [String]                     the thing with the error
@@ -39,6 +41,6 @@ class ClientErrorDetail
   private
 
   def canonical_code(x)
-    x.is_a?(Symbol) ? Code.from_symbol(x) : x
+    x.is_a?(Symbol) ? ClientErrorCode.from_symbol(x) : x
   end
 end

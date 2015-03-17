@@ -115,3 +115,6 @@
   Custom handlers can already handle those if they want. An error is
   raised if a 100 or 300 falls through.
 - removed `Superion.missing`
+
+### 0.0.53
+- Fixed bug due to missing `require`
