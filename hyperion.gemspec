@@ -24,7 +24,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'rspec'
   spec.add_development_dependency 'json_spec'
 
-  spec.add_runtime_dependency 'abstractivator', '>= 0.0.26'
+  spec.add_runtime_dependency 'abstractivator', '>= 0.0.27'
   spec.add_runtime_dependency 'activesupport'
   spec.add_runtime_dependency 'immutable_struct', '>= 1.1.1'
   spec.add_runtime_dependency 'oj', '>= 2.12.1'

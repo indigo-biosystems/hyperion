@@ -118,3 +118,6 @@
 
 ### 0.0.53
 - Fixed bug due to missing `require`
+
+### 0.0.54
+- abstractivator 0.0.27
