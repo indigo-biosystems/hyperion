@@ -1,34 +1,32 @@
-require 'superion'
-require 'hyperion_test'
 require 'ostruct'
-require 'hyperion/types/hyperion_error'
+require 'hyperion_test'
 
-class ClassWithSuperionHandlers
-  include Superion
-
-  def initialize(predetermined_result)
-    @predetermined_result = predetermined_result
-  end
-
-  def superion_handler(result)
-    result.when(->{true}) { @predetermined_result }
-  end
-end
-
-class ClassWithSuperionFallthrough
-  include Superion
+class ClassWithHyperionHandlers
+  include Hyperion::Requestor
 
   def initialize(predetermined_result)
     @predetermined_result = predetermined_result
   end
 
-  def superion_fallthrough(result)
+  def hyperion_handler(result)
     result.when(->{true}) { @predetermined_result }
   end
 end
 
-describe Superion do
-  include Superion
+class ClassWithHyperionFallthrough
+  include Hyperion::Requestor
+
+  def initialize(predetermined_result)
+    @predetermined_result = predetermined_result
+  end
+
+  def hyperion_fallthrough(result)
+    result.when(->{true}) { @predetermined_result }
+  end
+end
+
+describe Hyperion::Requestor do
+  include Hyperion::Requestor
 
   def arrange(method, response)
     @route = RestRoute.new(method, 'http://indigo.com/things',
@@ -64,15 +62,15 @@ describe Superion do
     assert_result(OpenStruct.new(x: 1, y: 2))
   end
 
-  context 'when a `superion_handlers` method is defined' do
+  context 'when a `hyperion_handlers` method is defined' do
     it 'takes precedence over the core handlers' do
       arrange(:get, [200, {}, nil])
-      superion_handler_result = double
+      hyperion_handler_result = double
       route = @route
-      @result = ClassWithSuperionHandlers.new(superion_handler_result).instance_eval do
+      @result = ClassWithHyperionHandlers.new(hyperion_handler_result).instance_eval do
         request(route)
       end
-      assert_result(superion_handler_result)
+      assert_result(hyperion_handler_result)
     end
   end
 
@@ -89,12 +87,12 @@ describe Superion do
     end
   end
 
-  context 'when a `superion_fallthrough` method is defined' do
+  context 'when a `hyperion_fallthrough` method is defined' do
     it 'receives results that were not handled by any handlers' do
       arrange(:get, [300, {}, nil])
       fallthrough_result = double
       route = @route
-      @result = ClassWithSuperionFallthrough.new(fallthrough_result).instance_eval do
+      @result = ClassWithHyperionFallthrough.new(fallthrough_result).instance_eval do
         request(route)
       end
       assert_result(fallthrough_result)
@@ -167,10 +165,10 @@ describe Superion do
       end
     end
 
-    context 'when a result falls through and a superion_fallthrough method is not defined' do
+    context 'when a result falls through and a hyperion_fallthrough method is not defined' do
       it 'raises an error' do
         arrange(:get, [(300..399).to_a.sample, {}, nil])
-        expect{request(@route)}.to raise_error HyperionError, /no superion_fallthrough method is defined/
+        expect{request(@route)}.to raise_error HyperionError, /no hyperion_fallthrough method is defined/
       end
     end
   end
