@@ -102,3 +102,16 @@
 
 ### 0.0.50
 - Allow dispatching on client error code
+
+### 0.0.52
+- `ErrorInfo` -> `ClientErrorDetail`
+- `ErrorInfo::Code` -> `ClientErrorCode`
+- `HyperionResult::Status` -> `HyperionStatus`
+- `ClientErrorResponse.new` signature changed
+- superion was absorbed into hyperion. instead, `require 'hyperion'`
+  and `include Hyperion::Requestor`
+- `superion_handler` -> `hyperion_handler`
+- removed `superion_fallthrough`. it's only hit on 100s and 300s.
+  Custom handlers can already handle those if they want. An error is
+  raised if a 100 or 300 falls through.
+- removed `Superion.missing`
