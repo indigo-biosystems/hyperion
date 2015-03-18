@@ -1,4 +1,5 @@
 # Hyperion
+![](https://travis-ci.org/indigo-biosystems/hyperion.svg)
 
 Hyperion is a Ruby REST client that follows certain conventions
 layered on top of HTTP. The conventions implement best practices
