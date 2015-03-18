@@ -127,3 +127,6 @@
 
 ### 0.0.56
 - another enum tweak
+
+### 0.0.57
+- json enum support from abstractivator
