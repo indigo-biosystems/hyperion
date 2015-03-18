@@ -124,3 +124,6 @@
 
 ### 0.0.55
 - upgraded abstractivator for wrapped enum values
+
+### 0.0.56
+- another enum tweak
