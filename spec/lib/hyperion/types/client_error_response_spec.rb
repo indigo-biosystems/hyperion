@@ -7,12 +7,12 @@ describe ClientErrorResponse do
           'message' => 'oops',
           'code' => 'missing',
           'errors' => [ make_error_attrs('assay') ],
-          'body' => 'stuff'
+          'content' => 'stuff'
       }
       result = ClientErrorResponse.from_attrs(hash)
       expect(result.message).to eql 'oops'
       expect(result.code).to eql ClientErrorCode::MISSING
-      expect(result.body).to eql 'stuff'
+      expect(result.content).to eql 'stuff'
       expect(result.errors.size).to eql 1
       error = result.errors.first
       expect(error.code).to eql ClientErrorCode::MISSING
@@ -27,11 +27,11 @@ describe ClientErrorResponse do
     it 'converts to a hash' do
       errors = [ ClientErrorDetail.new(ClientErrorCode::MISSING, 'x'),
                  ClientErrorDetail.new(ClientErrorCode::INVALID, 'x') ]
-      err = ClientErrorResponse.new('oops', errors, ClientErrorCode::INVALID, 'the_body')
+      err = ClientErrorResponse.new('oops', errors, ClientErrorCode::INVALID, 'the_content')
       result = err.as_json
       expect(result['message']).to eql 'oops'
       expect(result['code']).to eql 'invalid'
-      expect(result['body']).to eql 'the_body'
+      expect(result['content']).to eql 'the_content'
       expect(result['errors'].map(&['code'])).to eql %w(missing invalid)
     end
   end

@@ -130,3 +130,6 @@
 
 ### 0.0.57
 - json enum support from abstractivator
+
+### 0.0.58
+- Renamed `ClientErrorResponse#body` -> `ClientErrorResponse#content`

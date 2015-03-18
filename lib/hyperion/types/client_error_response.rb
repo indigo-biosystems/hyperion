@@ -8,9 +8,9 @@ class ClientErrorResponse
   attr_reader :code     # [ClientErrorCode]  The type of error. At least one of the ErrorInfos should have the same code.
   attr_reader :message  # [String]                     An error message that can be presented to the user
   attr_reader :errors   # [Array<ErrorInfo>]           Structured information with error specifics
-  attr_reader :body     # [String, nil]                An optional body to return; may be an application-specific description of the error.
+  attr_reader :content  # [String, nil]                Optional content to return; may be an application-specific description of the error.
 
-  def initialize(message, errors, code=nil, body=nil)
+  def initialize(message, errors, code=nil, content=nil)
     Hyperion::Util.guard_param(message, 'a message string', String)
     Hyperion::Util.guard_param(errors, 'an array of errors', &method(:error_array?))
     code = ClientErrorCode.from(code || errors.first.try(:code) || ClientErrorCode::UNKNOWN)
@@ -19,7 +19,7 @@ class ClientErrorResponse
     @message = message
     @code = code
     @errors = errors
-    @body = body
+    @content = content
   end
 
   def as_json(*_args)
@@ -27,7 +27,7 @@ class ClientErrorResponse
         'message' => message,
         'code' => code.value,
         'errors' => errors.map(&:as_json),
-        'body' => body
+        'content' => content
     }
   end
 
@@ -35,10 +35,10 @@ class ClientErrorResponse
     Hyperion::Util.nil_if_error do
       message = attrs['message']
       return nil if message.blank?
-      body = attrs['body']
+      content = attrs['content']
       code = code || ClientErrorCode.from(attrs['code'])
       errors = (attrs['errors'] || []).map(&ClientErrorDetail.method(:from_attrs))
-      self.new(message, errors, code, body)
+      self.new(message, errors, code, content)
     end
   end
 
