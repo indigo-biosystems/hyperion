@@ -28,6 +28,11 @@ class HyperionUri < SimpleDelegator
     @query_hash = parse_query(query)
   end
 
+  def path
+    path = @uri.path || ''
+    path == '' ? '/' : path
+  end
+
   def to_s
     fixed = @uri.dup
     fixed.query = query

@@ -34,6 +34,12 @@ describe Hyperion do
       result = Hyperion.request(post_greeting_route, write({'name' => 'freddy'}, :json))
       expect_success(result, {'greeting' => 'hello, freddy'})
     end
+    it 'works with the root (empty) path' do
+      route = RestRoute.new(:get, 'http://somsite.org', ResponseDescriptor.new('foo', 1, :json))
+      fake_route(route, 'it works')
+      result = Hyperion.request(route)
+      expect_success(result, 'it works')
+    end
     it 'returns 404 if a requested route is not stubbed' do
       bad_path = RestRoute.new(:get, 'http://somesite.org/abc', user_response_params)
       bad_headers = RestRoute.new(:get, 'http://somesite.org/users/0', ResponseDescriptor.new('abc', 1, :json))

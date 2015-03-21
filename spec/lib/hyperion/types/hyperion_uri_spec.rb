@@ -14,6 +14,11 @@ describe HyperionUri do
     expect(u.inspect).to include 'http://yum.com:44/res?id=1&name=foo'
   end
 
+  it 'return "/" for the root path' do
+    u = HyperionUri.new('http:://yum.com')
+    expect(u.path).to eql '/'
+  end
+
   it 'accepts additional query parameters as a hash' do
     u = HyperionUri.new('http://yum.com:44/res?id=1&name=foo', site: 'box')
     expect(u.query).to eql 'id=1&name=foo&site=box'
