@@ -1,5 +1,6 @@
 require 'rspec'
 require 'hyperion'
+require 'hyperion_test'
 require 'stringio'
 
 describe Hyperion do
@@ -182,6 +183,30 @@ describe Hyperion do
       allow(r).to receive(:timed_out?) { timed_out }
       r
     end
-
+  end
+  describe '::multi' do
+    let!(:route1) { RestRoute.new(:get, 'http://foo.com', ResponseDescriptor.new('foo', 1, :json)) }
+    let!(:route2) { RestRoute.new(:get, 'http://bar.com', ResponseDescriptor.new('bar', 1, :json)) }
+    before :each do
+      fake_route(route1, {'foo' => 'a'})
+      fake_route(route2, {'bar' => 'b'})
+    end
+    it 'executes multiple results in parallel' do
+      a = nil
+      b = nil
+      Hyperion.multi do
+        a = Hyperion.request(route1)
+        b = Hyperion.request(route2)
+      end
+      expect(a.body).to eql('foo' => 'a')
+      expect(b.body).to eql('bar' => 'b')
+    end
+    it 'raises an error if a result is accessed before the end of the multi block' do
+      a = nil
+      Hyperion.multi do
+        a = Hyperion.request(route1)
+        expect{a.body}.to raise_error HyperionError
+      end
+    end
   end
 end

@@ -146,4 +146,25 @@ describe Hyperion::Requestor do
       end
     end
   end
+
+  context 'when used with a "multi" block' do
+    let!(:route1) { RestRoute.new(:get, 'http://foo.com/fizz', ResponseDescriptor.new('foo', 1, :json)) }
+    let!(:route2) { RestRoute.new(:get, 'http://bar.com', ResponseDescriptor.new('bar', 1, :json)) }
+    before :each do
+      fake_route(route1, {'foo' => 'a'})
+      fake_route(route2, {'bar' => 'b'})
+    end
+    it 'works' do
+      a = nil
+      b = nil
+      Hyperion.multi do
+        a = request(route1, render: OpenStruct.method(:new))
+        b = request(route2, render: OpenStruct.method(:new))
+      end
+      expect(a).to be_an OpenStruct
+      expect(b).to be_an OpenStruct
+      expect(a.foo).to eql 'a'
+      expect(b.bar).to eql 'b'
+    end
+  end
 end

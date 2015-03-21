@@ -32,8 +32,8 @@ class Hyperion
       log_headers(headers)
     end
 
-    def log_request_end(ms)
-      logger.debug "Completed in #{ms}ms"
+    def log_request_end(request_infos)
+      logger.debug "Completed #{request_infos.join(', ')}"
       logger.debug ''
     end
 
