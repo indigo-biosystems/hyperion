@@ -13,9 +13,58 @@ use the API, and finally shows how to test your client-side code.
 
 ## Conventions
 
+The conventions are modeled after [GitHub's Developer API](https://developer.github.com/v3/).
+
 ### Versioning
 
-_TODO_
+According to best practices, hyperion uses both _resource_ versioning and
+_message_ versioning.
+
+#### Message versioning
+
+A client sends a _request_ to the server, and the server returns a
+_response_. The request and response each have a message type with a
+well specified structure. When placing the request, the client
+specifies the type of messages it expects back. For PUT, POST, and
+PATCH requests, the client also specifies the message type of the
+payload it is sending with the request.
+
+A client might send a request with the header:
+
+`Accept: application/vnd.indigobio.user-v1+json`
+
+which indicates that the server must return a "user" message, version
+1, formatted as JSON. If the server does not support this, it must
+return a 400-level error (discussed below).
+
+A client POSTing a new user also includes the header:
+
+`Content-Type: application/json`
+
+indicating that it is sending JSON. The server takes the Accept header
+message type to be the type of the request payload. <!--- seems fishy -->
+
+The message version is incremented when the message structure changes.
+
+_Note: Message types are currently established via documentation. In
+the future, it would be desirable for them to be declared precisely in
+a [protobuf](https://github.com/google/protobuf)-like, which would
+allow for generated documentation, simpler serialization code,
+automatic validation, and enhanced logging and diagnostics._
+
+#### Resource versioning
+
+Less frequently, the semantics of a given resource change. There are
+several ways a server can route a particular resource version,
+including:
+
+- `/v2/` - inforporating the version in the URI
+- `?v=2` - accepting the version as a query parameter
+- `v2.archiver.indigobio.com` - incorporating the version in the hostname
+- creating a differently named resource altogether
+
+Hyperion does not expressly support any of these conventions, although
+it may in the future.
 
 ### Errors
 
