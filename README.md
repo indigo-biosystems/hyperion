@@ -42,13 +42,14 @@ A client POSTing a new user also includes the header:
 `Content-Type: application/json`
 
 indicating that it is sending JSON. The server takes the Accept header
-message type to be the type of the request payload. <!--- seems fishy -->
+message type to be the type of the request payload.
+<!--- ^ seems fishy -->
 
 The message version is incremented when the message structure changes.
 
 _Note: Message types are currently established via documentation. In
 the future, it would be desirable for them to be declared precisely in
-a [protobuf](https://github.com/google/protobuf)-like, which would
+a [protobuf](https://github.com/google/protobuf)-like form, which would
 allow for generated documentation, simpler serialization code,
 automatic validation, and enhanced logging and diagnostics._
 
@@ -58,7 +59,7 @@ Less frequently, the semantics of a given resource change. There are
 several ways a server can route a particular resource version,
 including:
 
-- `/v2/` - inforporating the version in the URI
+- `/v2/` - incorporating the version in the URI
 - `?v=2` - accepting the version as a query parameter
 - `v2.archiver.indigobio.com` - incorporating the version in the hostname
 - creating a differently named resource altogether
@@ -66,38 +67,45 @@ including:
 Hyperion does not expressly support any of these conventions, although
 it may in the future.
 
-### Errors
 
-400-level errors are always returned as exactly 400; no distinction is
-made in the error code. Instead, a well-defined structure is returned
-that contains
+### Client Errors
+
+The server always returns 400-level errors as exactly 400; no
+distinction is made in the HTTP response code. Instead, the server
+returns a well-defined "client error response" structure that contains
 
 - a human-oriented error message, and
-- a machine-oriented list of "error info" structures.
+- a machine-oriented list of "error detail" structures.
 
-The point of the message is to describe the problem. The point of the
-error infos is to provide enough information to begin resolving the
-problem.
+The _message_ describes the problem. The _error details_ provide
+enough information to begin resolving the problem.
 
-An error info structure consists of:
+An error detail consists of:
 
-- code (not to be confused with the HTTP status code, e.g., 200)  <!--- consider renaming "problem" -->
+- code (not to be confused with the HTTP status code, _e.g._, 200)
+- reason
 - resource
 - field
 - value
-- reason
 
-As of this writing, allowable codes are
+The _code_ is an enumeration value (_e.g._, "missing", "invalid",
+"unsupported") which describes the type of problem with the request.
+<!--- ^ consider renaming "code" to "problem" -->
 
-- "missing"
-- "missing_field'
-- "invalid"
-- "unsupported"
-- "already_exists"
+The _reason_ explains why the problem occurred.
+
+The problem is associated with a particular _resource_, and perhaps
+more specifically with a particular _field_ and _value_ on that resource.
 
 Each field is a string. Depending on the code, some fields may not
 apply. Inapplicable fields are always present, with the empty string
 as their value. This simplifies the code that deals with them.
+
+
+### Server Errors
+
+Server errors are returned as normal 500 responses, which may or may
+not have a body. There is no special treatment.
 
 
 ## Using hyperion
@@ -385,8 +393,8 @@ See the specs for details.
 
 ## Maintenance
 
-When improving hyperion, bump the version in `version.rb` (Hyperion
-uses [semantic versioning](http://semver.org) and describe your
+When improving hyperion, increment the version in `version.rb` (Hyperion
+uses [semantic versioning](http://semver.org)) and describe your
 changes in `CHANGES.md`.
 
 ## Design decisions
