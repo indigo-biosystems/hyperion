@@ -3,7 +3,7 @@
 
 Hyperion is a Ruby REST client that follows certain conventions
 layered on top of HTTP. The conventions implement best practices
-surrounding versioning, error handling, and crafting an API for
+surrounding versioning, error reporting, and crafting an API for
 consumption by third parties. Hyperion provides abstractions that
 make it easy to follow these conventions consistently across
 projects.
@@ -24,15 +24,15 @@ made in the error code. Instead, a well-defined structure is returned
 that contains
 
 - a human-oriented error message, and
-- a machine-oriented list of `ErrorInfo`s.
+- a machine-oriented list of "error info" structures.
 
 The point of the message is to describe the problem. The point of the
 error infos is to provide enough information to begin resolving the
 problem.
 
-An `ErrorInfo` consists of:
+An error info structure consists of:
 
-- code
+- code (not to be confused with the HTTP status code, e.g., 200)  <!--- consider renaming "problem" -->
 - resource
 - field
 - value
@@ -40,11 +40,11 @@ An `ErrorInfo` consists of:
 
 As of this writing, allowable codes are
 
-- 'missing'
-- 'missing_field'
-- 'invalid'
-- 'unsupported'
-- 'already_exists'
+- "missing"
+- "missing_field'
+- "invalid"
+- "unsupported"
+- "already_exists"
 
 Each field is a string. Depending on the code, some fields may not
 apply. Inapplicable fields are always present, with the empty string
@@ -73,7 +73,10 @@ Hyperion provides a basic interface for requesting routes.
 ```ruby
 require 'hyperion'
 
-route = RestRoute.new(:get, 'http://somesite.org/users/0', ResponseDescriptor.new('user', 1, :json))
+message_type = 'user'
+version = 1
+format = :json
+route = RestRoute.new(:get, 'http://somesite.org/users/0', ResponseDescriptor.new(message_type, version, format))
 user = Hyperion.request(route)
 ```
 
@@ -128,7 +131,7 @@ on to the next predicate.
 
 In practice, you don't want to litter your code with `RestRoute.new`
 invocations. Here is a pattern for encapsulating the routes. It is the
-client-side analog of `routes.rb`.
+client-side analog of `routes.rb` in Rails.
 
 ```ruby
 class CrudRoutes
@@ -162,9 +165,14 @@ joe = Hyperion.request(user_routes.read(joes_id))
 
 A few notes:
 
-_TODO: comment on testing_
+`CrudRoutes` functions as an API spec, albeit a stripped down one.
+Therefore, there is no need to write specs for it; the specs would
+likely be harder to understand than the code itself. `CrudRoutes`
+could be DRYed up more, but that would reduce its understandability
+and create the need for specs.
 
-_TODO: comment on DRYing_
+See `AssaymaticRoutes` in ascent-web for the most complete example to
+date.
 
 
 ### Configuration
@@ -226,7 +234,7 @@ Superion has four levels of dispatching:
 - _includer_, and
 - _request_.
 
-_TODO: these terms could use improvement. Suggestions?_
+<!--- TODO: these terms could use improvement. -->
 
 They are distinguished by their scope. The core handler is built into
 superion. An includer handler affects all requests made by a
