@@ -383,6 +383,12 @@ fake_route(list_route, response)
 
 See the specs for details.
 
+## Maintenance
+
+When improving hyperion, bump the version in `version.rb` (Hyperion
+uses [semantic versioning](http://semver.org) and describe your
+changes in `CHANGES.md`.
+
 ## Design decisions
 
 Hyperion is backed by Typhoeus, which in turn is backed by libcurl.
