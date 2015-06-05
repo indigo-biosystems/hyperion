@@ -31,9 +31,9 @@ payload it is sending with the request.
 
 A client might send a request with the header:
 
-`Accept: application/vnd.indigobio.user-v1+json`
+`Accept: application/vnd.indigobio-ascent.user-v1+json`
 
-which indicates that the server must return a "user" message, version
+which indicates that the server must return an "ascent.user" message, version
 1, formatted as JSON. If the server does not support this, it must
 return a 400-level error (discussed below).
 
