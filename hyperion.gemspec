@@ -23,6 +23,7 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'yard'
   spec.add_development_dependency 'rspec', '~> 3.1.0'
   spec.add_development_dependency 'json_spec'
+  spec.add_development_dependency 'rspec_junit_formatter'
 
   spec.add_runtime_dependency 'abstractivator', '~> 0.0.31'
   spec.add_runtime_dependency 'activesupport'
