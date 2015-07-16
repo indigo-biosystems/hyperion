@@ -31,7 +31,7 @@ class Hyperion
             expect(write({a: 1}, :json)).to be_json_eql '{"a":1}'
           end
           context 'when writing times' do
-            let!(:time) { Time.parse('2015-02-13 08:40:20.321 +1200') }
+            let!(:time) { Time.parse('2015-02-13 08:40:20.321 +1200').localtime('+12:00') }
             it 'writes Time objects in UTC ISO 8601 format using the timezone that was passed in with milliseconds precision' do
               expect(write({'a' => time}, :json)).to be_json_eql '{"a":"' + time.localtime('+12:00').iso8601(3) + '"}'
             end
