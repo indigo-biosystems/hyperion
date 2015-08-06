@@ -1,5 +1,5 @@
 require 'hyperion'
-require 'rspec'
+require 'rspec/core'
 
 module TestFrameworkHooks
   def teardown_registered?
