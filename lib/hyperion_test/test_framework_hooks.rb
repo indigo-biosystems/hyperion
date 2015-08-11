@@ -3,8 +3,8 @@ require 'rspec/core'
 
 module TestFrameworkHooks
   def teardown_registered?
-    rspec_hooks[:after][:example].to_a.any? do |hook|
-      hook.block.source_location == method(:teardown).to_proc.source_location
+    rspec_after_example_hooks.any? do |hook_proc|
+      hook_proc.source_location == method(:teardown).to_proc.source_location
     end
   end
 
@@ -15,6 +15,17 @@ module TestFrameworkHooks
   def hook_teardown
     hyperion = self
     rspec_hooks.register(:prepend, :after, :each) { hyperion.teardown }
+  end
+
+  def rspec_after_example_hooks
+    if rspec_hooks.respond_to?(:[]) # approximately rspec 3.1.0
+      rspec_hooks[:after][:example].to_a.map(&:block)
+    else # approximately rspec 3.3.0
+      default_if_no_hooks = nil
+      hook_collection = rspec_hooks.send(:hooks_for, :after, :example) {default_if_no_hooks}
+      return [] unless hook_collection
+      hook_collection.items_and_filters.map(&:first).map(&:block)
+    end
   end
 
   def rspec_hooks
