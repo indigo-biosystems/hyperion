@@ -34,7 +34,10 @@ class Hyperion
     def restart_server
       server = self
       dispatcher = Dispatcher.new(rules)
-      Mimic.cleanup! if @mimic_running
+      if @mimic_running
+        Mimic.cleanup!
+        Mimic::Server.instance.instance_variable_get(:@thread).join
+      end
       Mimic.mimic(port: @port) do
         # this block executes in a strange context, which is why we
         # have to close over server and dispatcher

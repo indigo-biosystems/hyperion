@@ -133,3 +133,10 @@
 
 ### 0.0.58
 - Renamed `ClientErrorResponse#body` -> `ClientErrorResponse#content`
+
+### 0.1.0
+- Bumped version
+
+### 0.1.1
+- Attempted to solve problem in tests where clients hit an old server while
+  it's shutting down, resulting in a timeout.
