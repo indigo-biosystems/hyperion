@@ -140,3 +140,6 @@
 ### 0.1.1
 - Attempted to solve problem in tests where clients hit an old server while
   it's shutting down, resulting in a timeout.
+
+### 0.1.2
+- Fixed broken gemspec version for abstractivator
