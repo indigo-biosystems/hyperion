@@ -4,12 +4,12 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 require 'hyperion/aux/version'
 
 Gem::Specification.new do |spec|
-  spec.name          = 'hyperion'
+  spec.name          = 'hyperion_http'
   spec.version       = Hyperion::VERSION
   spec.authors       = ['Indigo BioAutomation, Inc.']
   spec.email         = ['pwinton@indigobio.com']
   spec.summary       = 'Ruby REST client'
-  spec.description   = 'Ruby REST client for internal Indigo BioAutomation service architecture'
+  spec.description   = 'Ruby REST client for internal service architecture'
   spec.homepage      = ''
   spec.license       = 'MIT'
 
