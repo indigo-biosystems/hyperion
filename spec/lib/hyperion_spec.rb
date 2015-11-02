@@ -19,7 +19,7 @@ describe Hyperion do
           'Accept' => "application/vnd.indigobio-ascent.#{rd.type}-v#{rd.version}+#{rd.format}",
           'Content-Type' => 'application/x-protobuf',
           'From' => 'dev@indigobio.com',
-          'Expect' => 'x'
+          'Expect' => nil
       }
 
       expect(Hyperion::Typho).to receive(:request).
@@ -43,7 +43,7 @@ describe Hyperion do
       let!(:expected_headers){{
           'Accept' => "application/vnd.indigobio-ascent.#{rd.type}-v#{rd.version}+#{rd.format}",
           'Content-Type' => 'application/json',
-          'Expect' => 'x'
+          'Expect' => nil
       }}
       it 'deserializes the response' do
         allow(Hyperion::Typho).to receive(:request).and_return(make_typho_response(200, '{"a":"b"}'))
