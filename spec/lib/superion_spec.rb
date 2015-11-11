@@ -39,6 +39,13 @@ describe Hyperion::Requestor do
     assert_result({'a' => 'b'})
   end
 
+  it 'makes requests with additional headers' do 
+    headers = {"X-my-header" => 'value' }
+    arrange(:get, {'a' => 'b'})
+    expect(Hyperion).to receive(:request).with(@route, nil, headers)
+    @result = request(@route,{:headers => headers})
+  end
+
   it 'makes requests with payload bodies' do
     arrange(:put, {'a' => 'b'})
     @result = request(@route, body: {'the' => 'body'})
