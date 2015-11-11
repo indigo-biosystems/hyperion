@@ -1,6 +1,8 @@
 require 'ostruct'
 require 'hyperion_test'
 
+# TODO: rename this file to something appropriate. superion became Hyperion::Requestor
+
 class ClassWithHyperionHandlers
   include Hyperion::Requestor
 
@@ -35,6 +37,13 @@ describe Hyperion::Requestor do
     arrange(:get, {'a' => 'b'})
     @result = request(@route)
     assert_result({'a' => 'b'})
+  end
+
+  it 'makes requests with additional headers' do 
+    headers = {'X-my-header' => 'value'}
+    arrange(:get, {'a' => 'b'})
+    expect(Hyperion).to receive(:request).with(@route, nil, headers)
+    @result = request(@route, headers: headers)
   end
 
   it 'makes requests with payload bodies' do
