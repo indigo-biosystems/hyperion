@@ -53,10 +53,7 @@ class Hyperion
   end
 
   def build_headers(additional_headers)
-    puts "AdditionalHeaders: " + additional_headers.inspect
-    new_h = route_headers(route).merge(additional_headers)
-    puts "Merged Headers: " new_h.inspect
-    new_h
+    route_headers(route).merge(additional_headers)
   end
 
   def hyperion_result_for(typho_result, dispatch)
