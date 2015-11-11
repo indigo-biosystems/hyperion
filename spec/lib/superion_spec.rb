@@ -40,10 +40,10 @@ describe Hyperion::Requestor do
   end
 
   it 'makes requests with additional headers' do 
-    headers = {"X-my-header" => 'value' }
+    headers = {'X-my-header' => 'value'}
     arrange(:get, {'a' => 'b'})
     expect(Hyperion).to receive(:request).with(@route, nil, headers)
-    @result = request(@route,{:headers => headers})
+    @result = request(@route, headers: headers)
   end
 
   it 'makes requests with payload bodies' do
