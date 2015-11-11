@@ -24,7 +24,7 @@ class Hyperion
       render = opts[:render] || Proc.identity
       project = project || Proc.identity
 
-      Hyperion.request(route, body,additional_headers=headers) do |result|
+      Hyperion.request(route, body, additional_headers=headers) do |result|
         all_handlers = [hash_handler(additional_handler_hash),
                         handler_from_including_class,
                         built_in_handler(project, render)]
