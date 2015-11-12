@@ -57,7 +57,8 @@ class Hyperion
           mode: :compat,
           time_format: :xmlschema,  # xmlschema == iso8601
           use_to_json: false,
-          second_precision: 3
+          second_precision: 3,
+          bigdecimal_load: :float
       }
     end
 
