@@ -18,6 +18,7 @@ class Hyperion
       case Formats.get_from(format)
       when :json; write_json(obj)
       when :protobuf; obj
+      when :form_data; obj
       else; fail "Unsupported format: #{format}"
       end
     end

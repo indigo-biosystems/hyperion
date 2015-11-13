@@ -43,6 +43,10 @@ class Hyperion
         it 'allows protobuf format but just passes it through' do
           expect(write('x', :protobuf)).to eql 'x'
         end
+        it 'allows form_data format but just passes it through' do
+          data = {test: 'data'}
+          expect(write(data, :form_data)).to eql data
+        end
       end
     end
 
