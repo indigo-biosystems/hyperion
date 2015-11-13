@@ -1,11 +1,12 @@
 require 'hyperion/formats'
+require 'logatron/logatron'
 
 class Hyperion
   module Headers
     # constructs and destructures HTTP headers
 
     def route_headers(route)
-      headers = {}
+      headers = Logatron.http_headers
       rd = route.response_descriptor
       pd = route.payload_descriptor
       headers['Expect'] = nil # this overrides default libcurl behavior.
