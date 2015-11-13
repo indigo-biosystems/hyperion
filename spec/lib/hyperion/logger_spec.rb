@@ -29,23 +29,28 @@ describe Hyperion::Logger do
   it 'respects the log level' do
     output = StringIO.new
     with_stdout(output) do
-      Hyperion::Logger.level = Logger::ERROR
+      Logatron.level = Logatron::ERROR
       logger.debug 'xyzzy'
       logger.error 'qwerty'
-      Hyperion::Logger.level = Logger::DEBUG
+      Logatron.level = Logatron::DEBUG
     end
     output_str = output.string
     expect(output_str).to include 'qwert'
     expect(output_str).to_not include 'xyzzy'
   end
 
-  def with_stdout(tmp_stdout)
-    old = $stdout
-    $stdout = tmp_stdout
+  def with_stdout(io)
+    set_log_io(io)
     begin
       yield
     ensure
-      $stdout = old
+      set_log_io($stdout)
+    end
+  end
+
+  def set_log_io(io)
+    Logatron.configure do |c|
+      c.logger = Logger.new(io)
     end
   end
 
