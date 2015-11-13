@@ -31,4 +31,5 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'oj', '~> 2.12'
   spec.add_runtime_dependency 'typhoeus', '~> 0.7'
   spec.add_runtime_dependency 'mimic', '~> 0.4.3'
+  spec.add_runtime_dependency 'logatron'
 end

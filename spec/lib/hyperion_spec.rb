@@ -15,16 +15,16 @@ describe Hyperion do
       body = 'Ventura'
       additional_headers = {'From' => 'dev@indigobio.com'}
 
-      expected_headers = {
-          'Accept' => "application/vnd.indigobio-ascent.#{rd.type}-v#{rd.version}+#{rd.format}",
-          'Content-Type' => 'application/x-protobuf',
-          'From' => 'dev@indigobio.com',
-          'Expect' => nil
-      }
+      expected_headers = Logatron.http_headers.merge(
+        'Accept' => "application/vnd.indigobio-ascent.#{rd.type}-v#{rd.version}+#{rd.format}",
+        'Content-Type' => 'application/x-protobuf',
+        'From' => 'dev@indigobio.com',
+        'Expect' => nil
+      )
 
       expect(Hyperion::Typho).to receive(:request).
-                                     with(uri, {method: method, headers: expected_headers, body: 'Ventura'}).
-                                     and_return(make_typho_response(200, write({'foo' => 'bar'}, :json)))
+                                   with(uri, {method: method, headers: expected_headers, body: 'Ventura'}).
+                                   and_return(make_typho_response(200, write({'foo' => 'bar'}, :json)))
 
       result = Hyperion.request(route, body, additional_headers)
       expect(result).to be_a HyperionResult
@@ -40,11 +40,12 @@ describe Hyperion do
       let!(:rd){ResponseDescriptor.new('data_type', 1, :json)}
       let!(:pd){PayloadDescriptor.new(:json)}
       let!(:route){RestRoute.new(method, uri, rd, pd)}
-      let!(:expected_headers){{
+      let!(:expected_headers) do
+        Logatron.http_headers.merge(
           'Accept' => "application/vnd.indigobio-ascent.#{rd.type}-v#{rd.version}+#{rd.format}",
           'Content-Type' => 'application/json',
-          'Expect' => nil
-      }}
+          'Expect' => nil)
+      end
       it 'deserializes the response' do
         allow(Hyperion::Typho).to receive(:request).and_return(make_typho_response(200, '{"a":"b"}'))
         result = Hyperion.request(route)
@@ -52,15 +53,15 @@ describe Hyperion do
       end
       it 'serializes the payload' do
         expect(Hyperion::Typho).to receive(:request).
-                                       with(uri, {method: method, headers: expected_headers, body: '{"c":"d"}'}).
-                                       and_return(make_typho_response(200, write({}, :json)))
+                                     with(uri, {method: method, headers: expected_headers, body: '{"c":"d"}'}).
+                                     and_return(make_typho_response(200, write({}, :json)))
         Hyperion.request(route, {'c' => 'd'})
       end
       it 'deserializes 400-level errors to ClientErrorResponse' do
         client_error = ClientErrorResponse.new('oops', [], ClientErrorCode::MISSING)
         allow(Hyperion::Typho).to receive(:request).
-                                      with(uri, {method: method, headers: expected_headers, body: '{"c":"d"}'}).
-                                      and_return(make_typho_response(400, write(client_error.as_json, :json)))
+                                    with(uri, {method: method, headers: expected_headers, body: '{"c":"d"}'}).
+                                    and_return(make_typho_response(400, write(client_error.as_json, :json)))
         result = Hyperion.request(route, {'c' => 'd'})
         expect(result.body).to be_a ClientErrorResponse
         expect(result.body.message).to eql 'oops'

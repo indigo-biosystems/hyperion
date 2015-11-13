@@ -1,9 +1,11 @@
 require 'hyperion'
 require 'hyperion/headers'
+require 'abstractivator/trees/tree_compare'
 
 class Hyperion
   describe Headers do
     include Headers
+    include Abstractivator::Trees
 
     before :each do
       Hyperion.configure do |config|
@@ -21,6 +23,10 @@ class Hyperion
       it 'creates a content-type header for the payload descriptor' do
         headers = route_headers(RestRoute.new(:get, uri, ResponseDescriptor.new('ttt', 999, :json), PayloadDescriptor.new(:json)))
         expect(headers['Content-Type']).to eql 'application/json'
+      end
+      it 'merges the logatron headers' do
+        headers = route_headers(RestRoute.new(:get, uri, ResponseDescriptor.new('ttt', 999, :json)))
+        expect(tree_compare(headers, Logatron.http_headers)).to eql []
       end
     end
 
