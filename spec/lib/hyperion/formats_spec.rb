@@ -21,6 +21,10 @@ class Hyperion
         descriptor = double(format: :json)
         expect(write({'a' => 1}, descriptor)).to eql '{"a":1}'
       end
+      it 'returns the body of a Multipart data request' do
+        data = Multipart.new(test: 'data')
+        expect(write(data, nil)).to eql data.body
+      end
 
       context 'formats' do
         context 'when writing json' do
@@ -42,10 +46,6 @@ class Hyperion
         end
         it 'allows protobuf format but just passes it through' do
           expect(write('x', :protobuf)).to eql 'x'
-        end
-        it 'allows form_data format but just passes it through' do
-          data = {test: 'data'}
-          expect(write(data, :form_data)).to eql data
         end
       end
     end

@@ -1,0 +1,1 @@
+Multipart = Struct.new(:body)

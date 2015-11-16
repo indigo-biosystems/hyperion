@@ -35,7 +35,6 @@ class Hyperion
       it 'returns the content type for the given format' do
         expect(content_type_for(:json)).to eql 'application/json'
         expect(content_type_for(:protobuf)).to eql 'application/x-protobuf'
-        expect(content_type_for(:form_data)).to eql 'multipart/form-data'
       end
       it 'returns application/octet-stream if the format is unknown' do
         expect(content_type_for(:aaa)).to eql 'application/octet-stream'
