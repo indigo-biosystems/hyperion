@@ -2,6 +2,7 @@ require 'oj'
 require 'stringio'
 require 'hyperion/aux/logger'
 require 'abstractivator/enum'
+require 'hyperion/types/multipart'
 
 class Hyperion
   module Formats
@@ -13,6 +14,7 @@ class Hyperion
     define_enum :Known, :json, :protobuf
 
     def write(obj, format)
+      return obj.body if obj.is_a?(Multipart)
       return obj if obj.is_a?(String) || obj.nil? || format.nil?
 
       case Formats.get_from(format)

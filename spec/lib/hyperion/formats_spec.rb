@@ -21,6 +21,10 @@ class Hyperion
         descriptor = double(format: :json)
         expect(write({'a' => 1}, descriptor)).to eql '{"a":1}'
       end
+      it 'returns the body of a Multipart data request' do
+        data = Multipart.new(test: 'data')
+        expect(write(data, nil)).to eql data.body
+      end
 
       context 'formats' do
         context 'when writing json' do
