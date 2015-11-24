@@ -31,6 +31,7 @@ class Hyperion
       case Formats.get_from(format)
       when :json; read_json(bytes)
       when :protobuf; bytes
+      when :form_data; bytes
       else; fail "Unsupported format: #{format}"
       end
     end

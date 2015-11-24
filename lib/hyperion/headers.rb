@@ -27,7 +27,8 @@ class Hyperion
     end
 
     ContentTypes = [[:json, 'application/json'],
-                    [:protobuf, 'application/x-protobuf']]
+                    [:protobuf, 'application/x-protobuf'],
+                    [:form_data, 'application/x-www-form-urlencoded']]
 
     def content_type_for(format)
       format = Hyperion::Formats.get_from(format)
