@@ -28,7 +28,7 @@ class Hyperion
 
     ContentTypes = [[:json, 'application/json'],
                     [:protobuf, 'application/x-protobuf'],
-                    [:form_data, 'application/x-www-form-urlencoded']]
+                    [Multipart.format, Multipart.content_type]]
 
     def content_type_for(format)
       format = Hyperion::Formats.get_from(format)
@@ -37,7 +37,7 @@ class Hyperion
     end
 
     def format_for(content_type)
-      ct = ContentTypes.detect{|x| x.last == content_type}
+      ct = ContentTypes.detect{|x| x.last == content_type.split(';')[0]}
       fail "Unsupported content type: #{content_type}" unless ct
       ct.first
     end

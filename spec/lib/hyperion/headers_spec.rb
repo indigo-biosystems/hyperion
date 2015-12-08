@@ -51,6 +51,7 @@ class Hyperion
       it 'returns the format for the given content type' do
         expect(format_for('application/json')).to eql :json
         expect(format_for('application/x-protobuf')).to eql :protobuf
+        expect(format_for('multipart/form-data; boundary=------------------------2b463b63688b28fa')).to eql Multipart.format
       end
       it 'raises an error if the content type is unknown' do
         expect{format_for('aaa/bbb')}.to raise_error
