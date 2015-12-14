@@ -82,6 +82,13 @@ class Hyperion
         it 'allows protobuf format but just passes it through' do
           expect(read('x', :protobuf)).to eql 'x'
         end
+        it 'allows multipart format data format but just passes it through' do
+          data = '--------------------------0bf18f00cf53ec0e' +
+              'Content-Disposition: form-data; name="file"; filename="test"' +
+              'Content-Type: application/octet-stream' +
+              '--------------------------0bf18f00cf53ec0e--'
+          expect(read(data, Multipart.format)).to eql data
+        end
       end
     end
   end
