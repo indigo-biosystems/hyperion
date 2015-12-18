@@ -14,6 +14,10 @@ class Hyperion
       end
     end
 
+    def log_error_response(response_body)
+      logger.error(log_message(response_body))
+    end
+
     def log_stub(rule)
       mr = rule.mimic_route
       logger.debug "Stubbed #{mr.method.to_s.upcase} #{mr.path}"
@@ -23,7 +27,16 @@ class Hyperion
     private
 
     def log_headers(headers, logger)
-      headers.each_pair { |k, v| logger.info "    #{k}: #{v}" unless k == 'Expect' }
+      h = headers.keep_if { |k| k != 'Expect' }
+      logger.info(log_message(h))
+    end
+
+    def log_message(obj)
+      if obj.is_a?(Hash)
+        obj.map { |k, v| "#{k}=#{v.inspect}" }.join(', ')
+      else
+        obj.to_s
+      end
     end
   end
 end

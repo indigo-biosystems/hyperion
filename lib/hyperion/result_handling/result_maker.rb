@@ -7,6 +7,7 @@ class Hyperion
   # Produces a hyperion result object from a typhoeus result object
   class ResultMaker
     include Hyperion::Formats
+    include Hyperion::Logger
 
     def self.make(route, typho_result, continuation=nil)
       self.new(route).make(typho_result, continuation)
@@ -34,6 +35,8 @@ class Hyperion
       # TODO: should this use the response's 'Content-Type' instead of response_descriptor.format?
       read_body = proc { read(typho_result.body, route.response_descriptor) }
       code = typho_result.code
+
+      log_error_response(read(typho_result.body, :json)) unless typho_result.success?
 
       if typho_result.success?
         result_class.new(route, HyperionStatus::SUCCESS, code, read_body.call)
