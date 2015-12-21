@@ -14,6 +14,15 @@ class RestRoute
     @payload_descriptor = payload_descriptor
   end
 
+  def as_json(*_args)
+    {
+        'method' => method.to_s,
+        'uri' => uri.to_s,
+        'response_descriptor' => response_descriptor.as_json(*_args),
+        'payload_descriptor' => payload_descriptor.as_json(*_args),
+    }
+  end
+
   def to_s
     "#{method.to_s.upcase} #{uri}"
   end

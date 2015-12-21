@@ -14,6 +14,14 @@ class ResponseDescriptor
     @type, @version, @format = type, version, format
   end
 
+  def as_json(*_args)
+    {
+        'type' => type,
+        'version' => version,
+        'format' => format.to_s
+    }
+  end
+
   def to_s
     short_mimetype(self)
   end

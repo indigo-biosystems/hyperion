@@ -50,8 +50,8 @@ describe Hyperion::Logger do
     context 'when the block raises an error' do
       let!(:error_raised) { true }
       it 'logs the headers when the block raises an error' do
-        expect(the_log).to include 'Present="here"'
-        expect(the_log).to include 'Empty=""'
+        expect(the_log).to include '"Present":"here"'
+        expect(the_log).to include '"Empty":""'
       end
       it 'hides nil headers' do
         expect(the_log).to_not include 'Absent'
@@ -76,10 +76,7 @@ describe Hyperion::Logger do
     context 'for a successful response' do
       let(:result) { HyperionResult.new(route, HyperionStatus::SUCCESS, 200, 'test') }
       it 'does not log anything' do
-        output = capture_stdout do
-          log_result(result)
-        end
-        expect(output).to be_empty
+        verify_result_not_logged
       end
     end
 
@@ -87,10 +84,7 @@ describe Hyperion::Logger do
       context 'with no body' do
         let(:result) { HyperionResult.new(route, HyperionStatus::TIMED_OUT) }
         it 'does not log anything ' do
-          output = capture_stdout do
-            log_result(result)
-          end
-          expect(output).to be_empty
+          verify_result_not_logged
         end
       end
 
@@ -101,20 +95,9 @@ describe Hyperion::Logger do
         let(:content) { 'content' }
         let(:error_response) { ClientErrorResponse.new(message, [error], code, content) }
         let(:result) { HyperionResult.new(route, HyperionStatus::CLIENT_ERROR, 400, error_response) }
-        it 'logs the key value pairs of the ClientErrorResponse' do
-          output = capture_stdout do
-            log_result(result)
-          end
-          pairs = error_response.as_json
-          errors = pairs.delete('errors').first
-          ensure_key_value_pairs_logged(pairs, output)
-          ensure_key_value_pairs_logged(errors, output)
-        end
 
-        def ensure_key_value_pairs_logged(hash, output)
-          hash.each do |k,v|
-            expect(output).to include "#{k}=#{v}"
-          end
+        it 'logs the key value pairs of the ClientErrorResponse' do
+          verify_result_logged
         end
       end
 
@@ -122,12 +105,23 @@ describe Hyperion::Logger do
         let(:body) { 'error' }
         let(:result) { HyperionResult.new(route, HyperionStatus::CLIENT_ERROR, 500, body) }
         it 'logs them' do
-          output = capture_stdout do
-            log_result(result)
-          end
-          expect(output).to include body
+          verify_result_logged
         end
       end
+    end
+
+    def verify_result_not_logged
+      output = capture_stdout do
+        log_result(result)
+      end
+      expect(output).to be_empty
+    end
+
+    def verify_result_logged
+      output = capture_stdout do
+        log_result(result)
+      end
+      expect(output).to eql Oj.dump(result.as_json) + "\n"
     end
   end
 
