@@ -35,7 +35,40 @@ describe Hyperion::Logger do
     expect(output).to_not include 'xyzzy'
   end
 
-  context '::log_result' do
+  context '#with_request_logging' do
+    let(:route) { RestRoute.new(:get, 'http://test.com', ResponseDescriptor.new('type', 1, :json)) }
+    let(:uri) { 'http://foo.bar' }
+    let(:headers) { {'Present' => 'here', 'Empty' => '', 'Absent' => nil} }
+    let!(:error_raised) { false }
+
+    it 'logs the method' do
+      expect(the_log).to include 'GET'
+    end
+    it 'logs the URI' do
+      expect(the_log).to include uri
+    end
+    context 'when the block raises an error' do
+      let!(:error_raised) { true }
+      it 'logs the headers when the block raises an error' do
+        expect(the_log).to include 'Present="here"'
+        expect(the_log).to include 'Empty=""'
+      end
+      it 'hides nil headers' do
+        expect(the_log).to_not include 'Absent'
+      end
+    end
+
+    def the_log
+      capture_stdout do
+        begin
+          with_request_logging(route, uri, headers) { raise 'oops' if error_raised }
+        rescue
+        end
+      end
+    end
+  end
+
+  context '#log_result' do
     let(:response_desc) { ResponseDescriptor.new('type', 1, :json) }
     let(:payload_desc) { PayloadDescriptor.new(:protobuf) }
     let(:route) { RestRoute.new(:get, 'http://test.com', response_desc, payload_desc) }

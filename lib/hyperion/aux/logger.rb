@@ -27,7 +27,7 @@ class Hyperion
     private
 
     def log_headers(headers, logger)
-      h = headers.keep_if { |k| k != 'Expect' }
+      h = headers.delete_if { |_k, v| v.nil? }
       logger.info(pretty_log(h))
     end
 
@@ -43,7 +43,7 @@ class Hyperion
       elsif obj.is_a? Array
         obj.map { |x| pretty_log(x) }
       else
-        obj.to_s
+        obj.inspect
       end
     end
   end
