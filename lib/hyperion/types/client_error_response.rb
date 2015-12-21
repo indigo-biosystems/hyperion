@@ -7,7 +7,7 @@ class ClientErrorResponse
 
   attr_reader :code     # [ClientErrorCode]  The type of error. At least one of the ErrorInfos should have the same code.
   attr_reader :message  # [String]                     An error message that can be presented to the user
-  attr_reader :errors   # [Array<ErrorInfo>]           Structured information with error specifics
+  attr_reader :errors   # [Array<ClientErrorDetail>]   Structured information with error specifics
   attr_reader :content  # [String, nil]                Optional content to return; may be an application-specific description of the error.
 
   def initialize(message, errors, code=nil, content=nil)
