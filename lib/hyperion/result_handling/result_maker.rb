@@ -7,6 +7,7 @@ class Hyperion
   # Produces a hyperion result object from a typhoeus result object
   class ResultMaker
     include Hyperion::Formats
+    include Hyperion::Logger
 
     def self.make(route, typho_result, continuation=nil)
       self.new(route).make(typho_result, continuation)
@@ -35,29 +36,31 @@ class Hyperion
       read_body = proc { read(typho_result.body, route.response_descriptor) }
       code = typho_result.code
 
-      if typho_result.success?
-        result_class.new(route, HyperionStatus::SUCCESS, code, read_body.call)
+      result = if typho_result.success?
+                 result_class.new(route, HyperionStatus::SUCCESS, code, read_body.call)
 
-      elsif typho_result.timed_out?
-        result_class.new(route, HyperionStatus::TIMED_OUT)
+               elsif typho_result.timed_out?
+                 result_class.new(route, HyperionStatus::TIMED_OUT)
 
-      elsif code == 0
-        result_class.new(route, HyperionStatus::NO_RESPONSE)
+               elsif code == 0
+                 result_class.new(route, HyperionStatus::NO_RESPONSE)
 
-      elsif code == 404
-        result_class.new(route, HyperionStatus::BAD_ROUTE, code)
+               elsif code == 404
+                 result_class.new(route, HyperionStatus::BAD_ROUTE, code)
 
-      elsif (400..499).include?(code)
-        hash_body = read(typho_result.body, :json)
-        err = ClientErrorResponse.from_attrs(hash_body) || hash_body
-        result_class.new(route, HyperionStatus::CLIENT_ERROR, code, err)
+               elsif (400..499).include?(code)
+                 hash_body = read(typho_result.body, :json)
+                 err = ClientErrorResponse.from_attrs(hash_body) || hash_body
+                 result_class.new(route, HyperionStatus::CLIENT_ERROR, code, err)
 
-      elsif (500..599).include?(code)
-        result_class.new(route, HyperionStatus::SERVER_ERROR, code, read_body.call)
+               elsif (500..599).include?(code)
+                 result_class.new(route, HyperionStatus::SERVER_ERROR, code, read_body.call)
 
-      else
-        result_class.new(route, HyperionStatus::CHECK_CODE, code, read_body.call)
-      end
+               else
+                 result_class.new(route, HyperionStatus::CHECK_CODE, code, read_body.call)
+               end
+      log_result(result)
+      result
     end
 
   end

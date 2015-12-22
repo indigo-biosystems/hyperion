@@ -6,4 +6,10 @@ class PayloadDescriptor
   def initialize(format)
     @format = format
   end
+
+  def as_json(*_args)
+    {
+        'format' => format.to_s,
+    }
+  end
 end
