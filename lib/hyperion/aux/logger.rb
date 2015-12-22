@@ -15,7 +15,7 @@ class Hyperion
     end
 
     def log_result(result)
-      logger.error(Oj.dump(result.as_json)) if should_log_result?(result)
+      logger.error(dump_json(result.as_json)) if should_log_result?(result)
     end
 
     def log_stub(rule)
