@@ -12,7 +12,7 @@ class Hyperion
   Config = Struct.new(:vendor_string)
 
   # @param route [RestRoute]
-  # @param body [String] the body to send with POST or PUT
+  # @param body [Object] the body to send with POST or PUT
   # @param additional_headers [Hash] headers to send in addition to the ones
   #   already determined by the route. Example: +{'User-Agent' => 'Mozilla/5.0'}+
   # @yield [result] yields the result if a block is provided

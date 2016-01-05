@@ -1,5 +1,5 @@
 # Hyperion
-[![Build Status](https://travis-ci.org/indigo-biosystems/hyperion.svg)](https://travis-ci.org/indigo-biosystems/hyperion) 
+[![Build Status](https://travis-ci.org/indigobio/hyperion.svg)](https://travis-ci.org/indigobio/hyperion) 
 
 Hyperion is a Ruby REST client that follows certain conventions
 layered on top of HTTP. The conventions implement best practices
@@ -133,7 +133,7 @@ require 'hyperion'
 message_type = 'user'
 version = 1
 format = :json
-route = RestRoute.new(:get, 'http://somesite.org/users/0', ResponseDescriptor.new(message_type, version, format))
+route = RestRoute.new(:get, 'http://somesite.org/users/0', response_descriptor = ResponseDescriptor.new(message_type, version, format))
 user = Hyperion.request(route)
 ```
 
@@ -142,7 +142,7 @@ block becomes the return value of `request`.
 
 ```ruby
 user = Hyperion.request(route) do |result|
-  if result.status == HyperionResult::Status::SUCCESS
+  if result.status == HyperionStatus::SUCCESS
     User.new(result.body)
   end
 end
@@ -153,7 +153,7 @@ provides a mini DSL to make it easier.
 
 ```ruby
 Hyperion.request(route) do |result|
-  result.when(HyperionResult::Status::SUCCESS) { User.new(result.body) }
+  result.when(HyperionStatus::SUCCESS) { User.new(result.body) }
   result.when(400..499) { raise 'we screwed up' }
   result.when(500..599) { raise 'they screwed up' }
   result.when(evil) { exit(1) }
@@ -172,8 +172,8 @@ becomes the return value of `request`.
 
 A condition may be:
 
-- a `HyperionResult::Status` enumeration member,
-- an `ErrorInfo::Code` enumeration member,
+- a `HyperionStatus` enumeration member,
+- an `ClientErrorCode` enumeration member,
 - an HTTP code,
 - a range of HTTP codes, or
 - an arbitrary [predicate](http://en.wikipedia.org/wiki/Predicate_(mathematical_logic)).
@@ -242,18 +242,18 @@ end
 ```
 
 
-## Superion
+## Requestor
 
-Superion layers more convenience onto Hyperion by helping dispatch the
+Requestor layers more convenience onto Hyperion by helping dispatch the
 response: internalizing the response and dealing with errors.
 
 ### Render and project
 
 ```ruby
-require 'superion'
+require 'hyperion'
 
 class UserGateway
-  include Superion
+  include Hyperion::Requestor
 
   def find(id)
     route = RestRoute.new(:get, "http://somesite.org/users/#{id}")
@@ -285,7 +285,7 @@ end
 
 ### Result dispatch
 
-Superion has four levels of dispatching:
+Requestor has three levels of dispatching:
 
 - _core_,
 - _includer_, and
@@ -294,13 +294,13 @@ Superion has four levels of dispatching:
 <!--- TODO: these terms could use improvement. -->
 
 They are distinguished by their scope. The core handler is built into
-superion. An includer handler affects all requests made by a
+requestor. An includer handler affects all requests made by a
 particular class. A request handler affects only a particular request.
 
-When superion receives a response, it passes the result through the
+When requestor receives a response, it passes the result through the
 request, includer, and core handlers, in that order. The first handler
 to match wins, and no further handlers are tried. If no handler
-matches, then superion raises a `HyperionError` error.
+matches, then requestor raises a `HyperionError` error.
 
 #### Core
 
@@ -318,15 +318,15 @@ The includer handler is an optional method on the requesting class.
 
 ```ruby
 class UserGateway
-  include Superion
+  include Hyperion::Requestor
 
   def find(id)
     ...
   end
 
-  def superion_handler(result)
-    result.when(ErrorInfo::MISSING) { raise "The resource was not found: #{result.route}" }
-    result.when(HyperionResult::Status::SERVER_ERROR) { ... }
+  def hyperion_handler(result)
+    result.when(ClientErrorCode::MISSING) { raise "The resource was not found: #{result.route}" }
+    result.when(HyperionStatus::SERVER_ERROR) { ... }
   end
 end
 ```
@@ -334,7 +334,7 @@ end
 #### Request
 
 The request handler provides a convenient way to specify a handler as
-a `Hash` for an individual `request` call. If a `superion_handler`
+a `Hash` for an individual `request` call. If a `hyperion_handler`
 looks like:
 
 ```ruby
@@ -393,8 +393,7 @@ See the specs for details.
 
 ## Maintenance
 
-When improving hyperion, increment the version in `version.rb` (Hyperion
-uses [semantic versioning](http://semver.org)) and describe your
+When improving hyperion, increment the version in `version.rb` and describe your
 changes in `CHANGES.md`.
 
 ## Design decisions
@@ -413,6 +412,13 @@ still lives in the hyperion gem but is only loaded when you `require
 `hyperion_test`, none of the test-related dependencies will be loaded
 in a production system, although the gem dependencies will be part of
 the production bundle.
+
+## Logging
+
+Hyperion currently uses Logatron for all of its logging needs. Logatron 
+specific headers are also included with every Hyperion request. One such header is
+the `'X-Ascent-Log-Id'` header containing a unique log id. This helps allow a
+unique log id to follow a resource across multiple components in a system. 
 
 # Parking Lot
 
