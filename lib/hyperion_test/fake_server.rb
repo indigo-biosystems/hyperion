@@ -3,6 +3,7 @@ require 'hyperion/aux/hash_ext'
 require 'hyperion_test/fake_server/dispatcher'
 require 'hyperion_test/fake_server/types'
 require 'hyperion_test/fake_server/config'
+require 'thin'
 
 class Hyperion
   class FakeServer
@@ -38,6 +39,7 @@ class Hyperion
         Mimic.cleanup!
         Mimic::Server.instance.instance_variable_get(:@thread).join
       end
+      Thin::Logging.silent = true # Thin always logs to STDOUT unless you quiet it
       Mimic.mimic(port: @port) do
         # this block executes in a strange context, which is why we
         # have to close over server and dispatcher

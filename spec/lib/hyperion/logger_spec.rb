@@ -134,11 +134,12 @@ describe Hyperion::Logger do
   end
 
   def with_stdout(io)
+    prev_logger = Logatron.configuration.logger
     set_log_io(io)
     begin
       yield
     ensure
-      set_log_io($stdout)
+      Logatron.configuration.logger = prev_logger
     end
   end
 
