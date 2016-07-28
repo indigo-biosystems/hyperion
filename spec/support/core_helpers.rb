@@ -7,7 +7,7 @@ RSpec.configure do |config|
 end
 
 Logatron.configure do |c|
-  c.logger = Logger.new($stdout)
+  c.logger = Logger.new(ENV['VERBOSE'] == 'true' ? $stdout : '/dev/null')
   c.level = Logatron::DEBUG
   c.transformer = proc {|x| x[:body]}
 end

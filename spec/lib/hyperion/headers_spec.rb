@@ -54,7 +54,7 @@ class Hyperion
         expect(format_for('multipart/form-data; boundary=------------------------2b463b63688b28fa')).to eql Multipart.format
       end
       it 'raises an error if the content type is unknown' do
-        expect{format_for('aaa/bbb')}.to raise_error
+        expect{format_for('aaa/bbb')}.to raise_error /Unsupported content type/
       end
     end
 
