@@ -3,7 +3,6 @@ require 'hyperion/aux/util'
 
 class Hyperion
   describe Util do
-
     describe '::nil_if_error' do
       it 'catches StandardErrors in the block' do
         expect(Util.nil_if_error { raise 'oops' }).to be_nil
@@ -25,5 +24,20 @@ class Hyperion
       end
     end
 
+    describe '::callcc' do
+      it 'returns the value of the block if the continuation is not invoked' do
+        v = Util.callcc { |_ret| 42 }
+        expect(v).to eql 42
+      end
+      it 'returns the argument if the continuation is invoked' do
+        v = Util.callcc { |ret| ret.call(99); 42 }
+        expect(v).to eql 99
+      end
+      it 'raises an error if the continuation is invoked outside of the block' do
+        cont = nil
+        Util.callcc { |ret| cont = ret }
+        expect { cont.call(99) }.to raise_error /continuation/
+      end
+    end
   end
 end
