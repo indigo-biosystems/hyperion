@@ -2,7 +2,6 @@
 require 'immutable_struct'
 require 'typhoeus'
 require 'oj'
-require 'continuation'
 require 'abstractivator/proc_ext'
 require 'abstractivator/enumerable_ext'
 require 'active_support/core_ext/object/blank'
