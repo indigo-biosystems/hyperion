@@ -60,7 +60,7 @@ class Hyperion
     result_maker = ResultMaker.new(route)
     if dispatch
       # callcc allows control to "jump" back here when the first predicate matches
-      callcc do |cont|
+      Util.callcc do |cont|
         dispatch.call(result_maker.make(typho_result, cont))
       end
     else
