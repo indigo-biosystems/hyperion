@@ -1,8 +1,6 @@
 require 'ostruct'
 require 'hyperion_test'
 
-# TODO: rename this file to something appropriate. superion became Hyperion::Requestor
-
 class ClassWithHyperionHandlers
   include Hyperion::Requestor
 

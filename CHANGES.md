@@ -389,5 +389,24 @@
 - Attempted to solve problem in tests where clients hit an old server while
   it's shutting down, resulting in a timeout.
 
-### 0.1.2
+### 0.1.2 - 2015-10-14
 - Fixed broken gemspec version for abstractivator
+
+### 0.1.3 - 2015-11-2
+- Changed name of the gem to `hyperion_http`
+- Fixed bug with Expect headers on AWS
+
+### 0.1.4 - 2015-11-11
+- Added support for additional headers for a request
+ 
+### 0.1.5 - 2015-11-13
+- Added logatron headers to requests
+
+### 0.1.6 - 2015-11-16
+- Added `Multipart` body
+
+### 0.1.7 - 2015-12-14
+- Fixed `fake_route` to work with a multipart body
+
+### Unreleased
+- Improved logging of error responses and headers
