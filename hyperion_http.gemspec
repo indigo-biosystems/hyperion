@@ -25,8 +25,8 @@ Gem::Specification.new do |spec|
   spec.add_development_dependency 'json_spec'
   spec.add_development_dependency 'rspec_junit_formatter'
 
-  spec.add_runtime_dependency 'abstractivator', '~> 0.0'
-  spec.add_runtime_dependency 'activesupport'
+  spec.add_runtime_dependency 'abstractivator', '~> 0.6'
+  spec.add_runtime_dependency 'activesupport', '>= 4', '< 5.1'
   spec.add_runtime_dependency 'immutable_struct', '~> 1.1'
   spec.add_runtime_dependency 'oj', '~> 2.12'
   spec.add_runtime_dependency 'typhoeus', '~> 0.7'
