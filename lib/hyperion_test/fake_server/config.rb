@@ -25,7 +25,6 @@ class Hyperion
           route = args.first
           Rule.new(MimicRoute.new(route.method, route.uri.path), route_headers(route), handler, route)
         else
-          # TODO: deprecate this
           method, path, headers = args
           headers ||= {}
           Rule.new(MimicRoute.new(method, path), headers, handler, nil)
