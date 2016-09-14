@@ -46,6 +46,15 @@ class Hyperion
         end
       end
 
+      def self.and(*ms)
+        h, *t = ms
+        if t.empty?
+          h
+        else
+          h.and(Matcher.and(*t))
+        end
+      end
+
       private
 
       # Coerce the return value of the function to nil/hash in case
@@ -53,19 +62,19 @@ class Hyperion
       # Update (mutate) the request params with any addition values
       # gleaned by a successful match.
       def self.wrap(f)
-        if f.is_a?(Matcher)
-          f
-        else
-          proc do |req|
-            v = coerce { f.call(req) }
-            # Update the request parameters. respond_to?(:params) is a
-            # compromise between outright depending on Kim::Request
-            # and threading a totally generic 'update' function
-            # through all the matcher code.
-            req.params = OpenStruct.new(req.params.to_h.merge(v)) if v && req.respond_to?(:params)
-            v
-          end
+      if f.is_a?(Matcher)
+        f
+      else
+        proc do |req|
+          v = coerce { f.call(req) }
+          # Update the request parameters. respond_to?(:params) is a
+          # compromise between outright depending on Kim::Request
+          # and threading a totally generic 'update' function
+          # through all the matcher code.
+          req.params = OpenStruct.new(req.params.to_h.merge(v)) if v && req.respond_to?(:params)
+          v
         end
+      end
       end
 
       def self.coerce

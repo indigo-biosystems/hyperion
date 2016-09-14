@@ -7,20 +7,20 @@ class Hyperion
 
       def res(resource_pattern)
         regex = resource_pattern.gsub(/:([^\/]+)/, "(?<\\1>[^\\/]+)")
-        proc do |req|
+        Matcher.new do |req|
           m = req.path.match(regex)
           m && m.names.zip(m.captures).to_h
         end
       end
 
       def verb(verb_to_match)
-        proc do |req|
-          req.verb.upcase == verb_to_match.upcase
+        Matcher.new do |req|
+          req.verb.to_s.upcase == verb_to_match.to_s.upcase
         end
       end
 
       def req_headers(required_headers)
-        proc do |req|
+        Matcher.new do |req|
           required_headers.each_pair.all? do |(k, v)|
             hash_includes?(req.headers.to_h, k, v)
           end
@@ -28,7 +28,7 @@ class Hyperion
       end
 
       def req_params(required_params)
-        proc do |req|
+        Matcher.new do |req|
           required_params.each_pair.all? do |(k, v)|
             hash_includes?(req.params.to_h, k, v)
           end

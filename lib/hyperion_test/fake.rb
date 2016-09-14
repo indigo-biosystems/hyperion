@@ -1,5 +1,4 @@
 require 'immutable_struct'
-require 'mimic'
 require 'hyperion/headers'
 require 'hyperion/formats'
 require 'uri'

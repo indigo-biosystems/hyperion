@@ -7,7 +7,19 @@ require 'hyperion_test/kim/matcher'
 
 class Hyperion
   class Kim
-    # A dumb fake web server
+    # A dumb fake web server.
+    # This is minimal object wrapper around Rack/WEBrick. WEBrick was chosen
+    # because it comes with ruby and we're not doing rocket science here.
+    # Kim runs Rack/WEBrick in a separate thread and keeps an array of
+    # handlers pairs. A handler is simply a predicate on a request object
+    # and a function to handle the request should the predicate return truthy.
+    # When rack notifies us of a request, we dispatch it to the first handler
+    # with a truthy predicate.
+    #
+    # Again, what we're trying to do is very simple. Most of the complexity is due to
+    # - thread synchronization
+    # - unmangling WEBrick's header renaming
+    # - loosening the requirements on what a handler function must return
 
     Handler = Struct.new(:pred, :func)
     Request = Struct.new(:verb, :path, :params, :headers, :body)
@@ -66,6 +78,7 @@ class Hyperion
       @lock.synchronize do
         handler = Handler.new(Matcher.wrap(matcher_or_pred), handler_proc)
         @handlers.unshift(handler)
+        # @handlers << handler
         remover = proc { @lock.synchronize { @handlers.delete(handler) } }
         remover
       end
@@ -135,7 +148,8 @@ class Hyperion
       if triplet?(r)
         r[0] = r[0].to_s
         r[1] = r[1] || {}
-        r[2] = r[2].is_a?(String) ? [r[2]] : r[2]
+        r[2] = !r[2].is_a?(Array) ? [r[2]] : r[2]
+        r[2].map!(&:to_s)
         r
       elsif r.is_a?(String)
         ['200', {}, [r]]
@@ -153,7 +167,7 @@ class Hyperion
     end
 
     def no_route_matched_response
-      ['400', error_headers, ['Request matched no routes.']]
+      ['404', error_headers, ['Request matched no routes.']]
     end
 
     def triplet?(x)

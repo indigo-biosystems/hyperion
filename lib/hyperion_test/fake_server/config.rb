@@ -23,11 +23,11 @@ class Hyperion
       def allowed_rule(args, handler)
         if args.size == 1 && args.first.is_a?(RestRoute)
           route = args.first
-          Rule.new(MimicRoute.new(route.method, route.uri.path), route_headers(route), handler, route)
+          Rule.new(route.method, route.uri.path, route_headers(route), handler, route)
         else
           method, path, headers = args
           headers ||= {}
-          Rule.new(MimicRoute.new(method, path), headers, handler, nil)
+          Rule.new(method, path, headers, handler, nil)
         end
       end
     end

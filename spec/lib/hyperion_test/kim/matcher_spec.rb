@@ -76,6 +76,16 @@ describe Hyperion::Kim::Matcher do
       expect(odd.call(2)).to be_falsey
     end
   end
+  describe '::and' do
+    it 'combines predicates with boolean AND' do
+      positive = Matcher.new { |x| x > 0 }
+      even = Matcher.new(&:even?)
+      mult10 = Matcher.new { |x| x % 10 == 0 }
+      m = Matcher.and(positive, even, mult10)
+      expect(m.call(10)).to be_truthy
+      expect(m.call(-10)).to be_falsey
+    end
+  end
   context 'when the object has params' do
     it 'updates the params as the predicate executes' do
       make_req = proc { |path| OpenStruct.new(path: path, params: {}) }

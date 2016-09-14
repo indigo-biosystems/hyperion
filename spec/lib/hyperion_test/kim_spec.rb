@@ -48,7 +48,7 @@ describe Hyperion::Kim do
       remover = kim.add_handler(always) { 'foo' }
       expect(get_body('/')).to eql 'foo'
       remover.call
-      expect(get_code('/')).to eql 400
+      expect(get_code('/')).to eql 404
     end
   end
 
@@ -57,7 +57,7 @@ describe Hyperion::Kim do
       kim.add_handler(always) { 'foo' }
       expect(get_body('/')).to eql 'foo'
       kim.clear_handlers
-      expect(get_code('/')).to eql 400
+      expect(get_code('/')).to eql 404
     end
   end
 
