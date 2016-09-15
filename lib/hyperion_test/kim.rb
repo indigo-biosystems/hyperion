@@ -11,7 +11,7 @@ class Hyperion
     # This is minimal object wrapper around Rack/WEBrick. WEBrick was chosen
     # because it comes with ruby and we're not doing rocket science here.
     # Kim runs Rack/WEBrick in a separate thread and keeps an array of
-    # handlers pairs. A handler is simply a predicate on a request object
+    # handlers. A handler is simply a predicate on a request object
     # and a function to handle the request should the predicate return truthy.
     # When rack notifies us of a request, we dispatch it to the first handler
     # with a truthy predicate.
@@ -20,11 +20,23 @@ class Hyperion
     # - thread synchronization
     # - unmangling WEBrick's header renaming
     # - loosening the requirements on what a handler function must return
+    #
+    # To support path parameters (e.g., /people/:name), a predicate may return
+    # a Request object as a truthy value, augmented with additional params.
+    # In this case, the augmented request object is passed to the handler
+    # function in place of the original.
 
     Handler = Struct.new(:pred, :func)
     Request = Struct.new(:verb, :path, :params, :headers, :body)
     class Request
       alias_method :method, :verb
+      def merge(other)
+        merge_params(other.params)
+      end
+      def merge_params(other_params)
+        params = OpenStruct.new(self.params.to_h.merge(other_params.to_h))
+        Request.new(verb, path, params, headers, body)
+      end
     end
 
     def initialize(port:)
@@ -78,7 +90,6 @@ class Hyperion
       @lock.synchronize do
         handler = Handler.new(Matcher.wrap(matcher_or_pred), handler_proc)
         @handlers.unshift(handler)
-        # @handlers << handler
         remover = proc { @lock.synchronize { @handlers.delete(handler) } }
         remover
       end
@@ -94,15 +105,10 @@ class Hyperion
     def handle_request(env)
       @lock.synchronize do
         req = request_from_env(env)
-        handler = find_handler(req)
-        if handler
-          x = handler.func.call(req)
-          x = massage_response(x)
-          x = validate_response(x)
-          x
-        else
-          no_route_matched_response
-        end
+        x = handle(req)
+        x = massage_response(x)
+        x = validate_response(x)
+        x
       end
     end
 
@@ -140,8 +146,12 @@ class Hyperion
         .join('-')
     end
 
-    def find_handler(req)
-      @handlers.detect { |h| h.pred.call(req) }
+    def handle(req)
+      pred_value, func = @handlers.lazy
+        .map { |h| [h.pred.call(req), h.func] }
+        .select { |(pv, _)| pv }
+        .first || [nil, no_route_matched_func]
+      func.call(pred_value.is_a?(Request) ? pred_value : req)
     end
 
     def massage_response(r)
@@ -166,8 +176,10 @@ class Hyperion
       r
     end
 
-    def no_route_matched_response
-      ['404', error_headers, ['Request matched no routes.']]
+    def no_route_matched_func
+      proc do
+        ['404', error_headers, ['Request matched no routes.']]
+      end
     end
 
     def triplet?(x)

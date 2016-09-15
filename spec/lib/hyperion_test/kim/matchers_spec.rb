@@ -1,4 +1,5 @@
 require 'rspec'
+require 'hyperion_test/kim'
 require 'hyperion_test/kim/matchers'
 
 describe Hyperion::Kim::Matchers do
@@ -7,8 +8,8 @@ describe Hyperion::Kim::Matchers do
     it 'matches resource paths' do
       m = res('/people/:name/birthplace/:city')
       r = m.call(req(path: '/people/kim/birthplace/la'))
-      expect(r['name']).to eql 'kim'
-      expect(r['city']).to eql 'la'
+      expect(r.params.name).to eql 'kim'
+      expect(r.params.city).to eql 'la'
       expect(m.call(req(path: '/people/kim/home/la'))).to be_falsey
     end
   end
@@ -46,8 +47,8 @@ describe Hyperion::Kim::Matchers do
     end
   end
 
-  def req(*args)
-    OpenStruct.new(*args)
+  def req(attrs)
+    Hyperion::Kim::Request.new(*attrs.values_at(*Hyperion::Kim::Request.members))
   end
 
   def params(*args)

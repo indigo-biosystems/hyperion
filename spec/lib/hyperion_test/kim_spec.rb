@@ -81,7 +81,7 @@ describe Hyperion::Kim do
     end
     it 'receives the params' do
       params = nil
-      kim.add_handler(proc{{d: '4', e: '5'}}) { |r| params = r.params; '' }
+      kim.add_handler(proc{ |req| req.merge_params(d: '4', e: '5') }) { |r| params = r.params; '' }
       get('/foo/bar?a=1&b=2&c=3')
       expect(params.a).to eql '1'
       expect(params[:b]).to eql '2'

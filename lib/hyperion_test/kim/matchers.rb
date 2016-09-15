@@ -1,4 +1,5 @@
 require 'active_support/hash_with_indifferent_access'
+require 'hyperion_test/kim/matcher'
 
 class Hyperion
   class Kim
@@ -9,7 +10,7 @@ class Hyperion
         regex = resource_pattern.gsub(/:([^\/]+)/, "(?<\\1>[^\\/]+)")
         Matcher.new do |req|
           m = req.path.match(regex)
-          m && m.names.zip(m.captures).to_h
+          m && req.merge_params(m.names.zip(m.captures).to_h)
         end
       end
 
