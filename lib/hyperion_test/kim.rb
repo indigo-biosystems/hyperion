@@ -28,11 +28,11 @@ class Hyperion
     # passed to the handler function in place of the original request.
 
     Handler = Struct.new(:pred, :func)
-    Request = Struct.new(:verb, # 'GET' | 'POST' | ...
-                         :path, # String
-                         :params, # OpenStruct
-                         :headers, # Hash[String => String]
-                         :body) # String
+    Request = Struct.new(:verb,     # 'GET' | 'POST' | ...
+                         :path,     # String
+                         :params,   # OpenStruct
+                         :headers,  # Hash[String => String]
+                         :body)     # String
     class Request
       alias_method :method, :verb
       def merge(other)
@@ -70,11 +70,14 @@ class Hyperion
         Kim.webrick_mutex.synchronize do
           q = Queue.new
           @thread = Thread.start do
-            opts = {Port: @port, Logger: ::Logger.new('/dev/null'), AccessLog: []} # hide output
-            Rack::Handler::WEBrick.run(method(:handle_request), opts) do |webrick|
-              q.push(webrick)
+            begin
+              opts = {Port: @port, Logger: ::Logger.new('/dev/null'), AccessLog: []} # hide output
+              Rack::Handler::WEBrick.run(method(:handle_request), opts) do |webrick|
+                q.push(webrick)
+              end
+            ensure
+              $stderr.puts "Hyperion fake server on port #{@port} exited unexpectedly!" unless @stopped
             end
-            $stderr.puts "Hyperion fake server on port #{@port} exited unexpectedly!" unless @stopped
           end
           @webrick = q.pop
         end
