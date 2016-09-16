@@ -1,11 +1,10 @@
 # coding: utf-8
 lib = File.expand_path('../lib', __FILE__)
 $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
-require 'hyperion/aux/version'
 
 Gem::Specification.new do |spec|
   spec.name          = 'hyperion_http'
-  spec.version       = Hyperion::VERSION
+  spec.version       = '0.1.9'
   spec.authors       = ['Indigo BioAutomation, Inc.']
   spec.email         = ['pwinton@indigobio.com']
   spec.summary       = 'Ruby REST client'
