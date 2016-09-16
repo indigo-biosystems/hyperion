@@ -39,11 +39,11 @@ class Hyperion
       end
 
       def self.and(*ms)
-        h, *t = ms
-        if t.empty?
-          h
+        m, *rest = ms
+        if rest.empty?
+          m
         else
-          h.and(Matcher.and(*t))
+          m.and(Matcher.and(*rest))
         end
       end
 
@@ -73,8 +73,7 @@ class Hyperion
       end
 
       def self.coerce(f, req)
-        v = f.call(req)
-        case v
+        case v = f.call(req)
         when TrueClass then req
         when FalseClass then nil
         else v

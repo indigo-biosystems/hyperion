@@ -17,6 +17,7 @@ describe Hyperion::Kim::Matchers do
     it 'matches the HTTP verb' do
       expect(verb('GET').call(req(verb: 'GET'))).to be_truthy
       expect(verb('PUT').call(req(verb: 'put'))).to be_truthy
+      expect(verb(:post).call(req(verb: 'POST'))).to be_truthy
       expect(verb('GET').call(req(verb: 'PUT'))).to be_falsey
     end
   end

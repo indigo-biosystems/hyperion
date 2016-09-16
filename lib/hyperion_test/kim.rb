@@ -16,18 +16,23 @@ class Hyperion
     # When rack notifies us of a request, we dispatch it to the first handler
     # with a truthy predicate.
     #
-    # Again, what we're trying to do is very simple. Most of the complexity is due to
+    # Again, what we're trying to do is very simple. Most of the existing complexity
+    # is due to
     # - thread synchronization
     # - unmangling WEBrick's header renaming
     # - loosening the requirements on what a handler function must return
     #
     # To support path parameters (e.g., /people/:name), a predicate may return
     # a Request object as a truthy value, augmented with additional params.
-    # In this case, the augmented request object is passed to the handler
-    # function in place of the original.
+    # When the predicate returns a Request, the augmented request object is
+    # passed to the handler function in place of the original request.
 
     Handler = Struct.new(:pred, :func)
-    Request = Struct.new(:verb, :path, :params, :headers, :body)
+    Request = Struct.new(:verb, # 'GET' | 'POST' | ...
+                         :path, # String
+                         :params, # OpenStruct
+                         :headers, # Hash[String => String]
+                         :body) # String
     class Request
       alias_method :method, :verb
       def merge(other)
@@ -46,7 +51,7 @@ class Hyperion
     end
 
     def self.webrick_mutex
-      @webrick_mutex ||= Mutex.new # controls access to Rack::Handler::WEBrick singleton
+      @webrick_mutex ||= Mutex.new # controls access to the Rack::Handler::WEBrick singleton
     end
 
     def start
@@ -56,13 +61,13 @@ class Hyperion
       # which touches singleton instance variables. webrick_mutex
       # ensures only one thread is in the singleton at a time.
       #
-      # A queue is used to notify the calling thread that
-      # the server thread has started. The caller needs to wait
-      # so it can obtain the webrick instance.
+      # A threadsafe queue is used to notify the calling thread
+      # that the server thread has started. The caller needs to
+      # wait so it can obtain the webrick instance.
 
       @lock.synchronize do
         raise 'Cannot restart' if @stopped
-        self.class.webrick_mutex.synchronize do
+        Kim.webrick_mutex.synchronize do
           q = Queue.new
           @thread = Thread.start do
             opts = {Port: @port, Logger: ::Logger.new('/dev/null'), AccessLog: []} # hide output
@@ -87,6 +92,7 @@ class Hyperion
       end
     end
 
+    # Add a handler. Returns a proc that removes the handler.
     def add_handler(matcher_or_pred, &handler_proc)
       @lock.synchronize do
         handler = Handler.new(Matcher.wrap(matcher_or_pred), handler_proc)
@@ -105,7 +111,7 @@ class Hyperion
     private
     def handle_request(env)
       @lock.synchronize do
-        req = request_from_env(env)
+        req = request_for(env)
         x = handle(req)
         x = massage_response(x)
         x = validate_response(x)
@@ -113,7 +119,7 @@ class Hyperion
       end
     end
 
-    def request_from_env(env)
+    def request_for(env)
       verb = env['REQUEST_METHOD']
       path = env['PATH_INFO']
       params = OpenStruct.new(read_query_params(env['QUERY_STRING']))
@@ -123,13 +129,14 @@ class Hyperion
     end
 
     def read_query_params(query_string)
-      query_string.split('&')
+      query_string
+        .split('&')
         .map { |kv| kv.split('=') }
         .to_h
     end
 
     def read_headers(env)
-      # along the same lines as https://github.com/ruby/ruby/blob/32674b167bddc0d737c38f84722986b0f228b44b/lib/webrick/cgi.rb#L217-L226
+      # similar to https://github.com/ruby/ruby/blob/32674b167bddc0d737c38f84722986b0f228b44b/lib/webrick/cgi.rb#L217-L226
       env.each_pair
         .select { |k, _| mangled_header?(k) }
         .map { |k, v| [unmangle_header_key(k), v] }
@@ -157,9 +164,9 @@ class Hyperion
 
     def massage_response(r)
       if triplet?(r)
-        r[0] = r[0].to_s
-        r[1] = r[1] || {}
-        r[2] = !r[2].is_a?(Array) ? [r[2]] : r[2]
+        r[0] = r[0].to_s   # code
+        r[1] = r[1] || {}  # headers
+        r[2] = *r[2]       # body/bodies (coerce to array)
         r[2].map!(&:to_s)
         r
       elsif r.is_a?(String)

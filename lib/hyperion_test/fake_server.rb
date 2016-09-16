@@ -26,7 +26,7 @@ class Hyperion
       config = Config.new
       configure_routes.call(config)
       config.rules.each do |rule|
-        matcher = Kim::Matcher.and(verb(rule.method),
+        matcher = Kim::Matcher.and(verb(rule.verb),
                                    res(rule.path),
                                    req_headers(rule.headers))
         handler = wrap(rule.handler, rule.rest_route)
@@ -60,13 +60,12 @@ class Hyperion
     end
 
     def massage_response(resp, rest_route)
-      if resp.is_a?(Array) && resp.size == 3
-        if resp[2].is_a?(String)
-          resp
-        else
-          resp[2] = write(resp[2], :json)
-          resp
+      if rack_response?(resp)
+        code, headers, body = resp
+        unless body.is_a?(String)
+          body = write(body, :json)
         end
+        [code, headers, body]
       else
         if rest_route
           rd = rest_route.response_descriptor
@@ -78,6 +77,10 @@ class Hyperion
         end
         ['200', {'Content-Type' => content_type}, write(resp, format)]
       end
+    end
+
+    def rack_response?(resp)
+      resp.is_a?(Array) && resp.size == 3
     end
   end
 end
