@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name          = 'hyperion_http'
-  spec.version       = '0.1.9'
+  spec.version       = '0.2.0'
   spec.authors       = ['Indigo BioAutomation, Inc.']
   spec.email         = ['pwinton@indigobio.com']
   spec.summary       = 'Ruby REST client'
