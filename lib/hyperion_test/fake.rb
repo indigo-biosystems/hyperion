@@ -1,5 +1,4 @@
 require 'immutable_struct'
-require 'mimic'
 require 'hyperion/headers'
 require 'hyperion/formats'
 require 'uri'
@@ -7,27 +6,37 @@ require 'hyperion_test/fake_server'
 
 class Hyperion
   class << self
-    # maintains a collection of fake servers, one for each base_uri.
-    # manages rspec integration for automatic teardown after each test.
+    # Maintains a collection of fake servers, one for each base_uri.
+    # Manages rspec integration for automatic teardown after each test.
 
     include Formats
     include Headers
     include TestFrameworkHooks
     include Logger
 
+    # Configure routes on the server for the given base_uri
     def fake(base_uri, &routes)
       base_uri = normalized_base(base_uri)
-      if !@running
-        hook_teardown if can_hook_teardown? && !teardown_registered?
-        @running = true
+      unless @configured
+        hook_reset if can_hook_reset? && !reset_registered?
+        @configured = true
       end
       servers[base_uri].configure(&routes)
     end
 
-    def teardown
+    # Clear routes but don't stop servers. Meant to be called between tests.
+    # Starting/stopping servers is relatively slow. They can be reused.
+    def reset
+      servers.values.each(&:clear_routes)
+      @configured = false
+    end
+
+    # Stop all servers. This should only need to be called by tests that use
+    # Kim directly (like kim_spec.rb).
+    def teardown_cached_servers
       servers.values.each(&:teardown)
       servers.clear
-      @running = false
+      @configured = false
     end
 
     private

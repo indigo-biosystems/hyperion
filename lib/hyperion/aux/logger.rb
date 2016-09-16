@@ -19,8 +19,7 @@ class Hyperion
     end
 
     def log_stub(rule)
-      mr = rule.mimic_route
-      logger.debug "Stubbed #{mr.method.to_s.upcase} #{mr.path}"
+      logger.debug "Stubbed #{rule.method.to_s.upcase} #{rule.path}"
       log_headers(rule.headers, logger)
     end
 

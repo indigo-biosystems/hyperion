@@ -30,6 +30,6 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'immutable_struct', '~> 1.1'
   spec.add_runtime_dependency 'oj', '~> 2.12'
   spec.add_runtime_dependency 'typhoeus', '~> 0.7'
-  spec.add_runtime_dependency 'mimic', '0.4.3' # pin because 0.4.4 breaks tests
+  spec.add_runtime_dependency 'rack'
   spec.add_runtime_dependency 'logatron'
 end

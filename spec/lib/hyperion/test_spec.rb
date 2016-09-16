@@ -73,8 +73,8 @@ describe Hyperion do
   end
 
   it 'logs requests for unstubbed routes' do
-    route1 = RestRoute.new(:get, 'http://site.org/stuff', user_response_params)
-    route2 = RestRoute.new(:get, 'http://site.org/things', user_response_params)
+    route1 = RestRoute.new(:get, 'http://somesite.org/stuff', user_response_params)
+    route2 = RestRoute.new(:get, 'http://somesite.org/things', user_response_params)
     Hyperion.fake(route1.uri.base) do |svr|
       svr.allow(route1) {{}}
     end
@@ -136,23 +136,23 @@ describe Hyperion do
   end
 
   it 'allows multiple fake servers to be created' do
-    Hyperion.fake('http://google.com') do |svr|
-      svr.allow(:get, '/welcome') { success_response({'text' => 'hello from google'}) }
+    Hyperion.fake('http://somesite.org') do |svr|
+      svr.allow(:get, '/welcome') { success_response({'text' => 'hello from somesite'}) }
     end
 
-    Hyperion.fake('http://indigo.com:3000') do |svr|
-      svr.allow(:get, '/welcome') { success_response({'text' => 'hello from indigo@3000'}) }
+    Hyperion.fake('http://indigo.com:80') do |svr|
+      svr.allow(:get, '/welcome') { success_response({'text' => 'hello from indigo@80'}) }
     end
 
     Hyperion.fake('http://indigo.com:4000') do |svr|
       svr.allow(:get, '/welcome') { success_response({'text' => 'hello from indigo@4000'}) }
     end
 
-    result = Hyperion.request(RestRoute.new(:get, 'http://google.com/welcome', user_response_params))
-    expect(result.body).to eql({'text' => 'hello from google'})
+    result = Hyperion.request(RestRoute.new(:get, 'http://somesite.org/welcome', user_response_params))
+    expect(result.body).to eql({'text' => 'hello from somesite'})
 
-    result = Hyperion.request(RestRoute.new(:get, 'http://indigo.com:3000/welcome', user_response_params))
-    expect(result.body).to eql({'text' => 'hello from indigo@3000'})
+    result = Hyperion.request(RestRoute.new(:get, 'http://indigo.com:80/welcome', user_response_params))
+    expect(result.body).to eql({'text' => 'hello from indigo@80'})
 
     result = Hyperion.request(RestRoute.new(:get, 'http://indigo.com:4000/welcome', user_response_params))
     expect(result.body).to eql({'text' => 'hello from indigo@4000'})
@@ -176,37 +176,37 @@ describe Hyperion do
   end
 
   it 'allows routes to be augmented' do
-    Hyperion.fake('http://google.com') do |svr|
+    Hyperion.fake('http://somesite.org') do |svr|
       svr.allow(:get, '/old') { success_response({'text' => 'old'}) }
       svr.allow(:get, '/hello') { success_response({'text' => 'hello'}) }
       svr.allow(RestRoute.new(:get, '/users/0', user_response_params)) { success_response({'user' => 'old user'}) }
     end
 
     # smoke test that the server is up and running
-    result = Hyperion.request(RestRoute.new(:get, 'http://google.com/hello', user_response_params))
+    result = Hyperion.request(RestRoute.new(:get, 'http://somesite.org/hello', user_response_params))
     expect(result.body).to eql({'text' => 'hello'})
 
     # augment the routes
-    Hyperion.fake('http://google.com') do |svr|
+    Hyperion.fake('http://somesite.org') do |svr|
       svr.allow(:get, '/hello') { success_response({'text' => 'aloha'}) }
       svr.allow(:get, '/goodbye') { success_response({'text' => 'goodbye'}) }
       svr.allow(RestRoute.new(:get, '/users/0', user_response_params)) { success_response({'user' => 'new user'}) }
     end
 
     # untouched routes are left alone
-    result = Hyperion.request(RestRoute.new(:get, 'http://google.com/old', user_response_params))
+    result = Hyperion.request(RestRoute.new(:get, 'http://somesite.org/old', user_response_params))
     expect(result.body).to eql({'text' => 'old'})
 
     # restating the route replaces it (last one wins)
-    result = Hyperion.request(RestRoute.new(:get, 'http://google.com/hello', user_response_params))
+    result = Hyperion.request(RestRoute.new(:get, 'http://somesite.org/hello', user_response_params))
     expect(result.body).to eql({'text' => 'aloha'})
 
     # new routes can be added
-    result = Hyperion.request(RestRoute.new(:get, 'http://google.com/goodbye', user_response_params))
+    result = Hyperion.request(RestRoute.new(:get, 'http://somesite.org/goodbye', user_response_params))
     expect(result.body).to eql({'text' => 'goodbye'})
 
     # restating a route routes that uses headers to differentiate replaces it (last one wins)
-    result = Hyperion.request(RestRoute.new(:get, 'http://google.com/users/0', user_response_params))
+    result = Hyperion.request(RestRoute.new(:get, 'http://somesite.org/users/0', user_response_params))
     expect(result.body).to eql({'user' => 'new user'})
   end
 

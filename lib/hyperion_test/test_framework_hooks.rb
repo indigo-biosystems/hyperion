@@ -2,19 +2,19 @@ require 'hyperion'
 require 'rspec/core'
 
 module TestFrameworkHooks
-  def teardown_registered?
+  def reset_registered?
     rspec_after_example_hooks.any? do |hook_proc|
-      hook_proc.source_location == method(:teardown).to_proc.source_location
+      hook_proc.source_location == method(:reset).to_proc.source_location
     end
   end
 
-  def can_hook_teardown?
-    RSpec.current_example
+  def can_hook_reset?
+    !!RSpec.current_example
   end
 
-  def hook_teardown
+  def hook_reset
     hyperion = self
-    rspec_hooks.register(:prepend, :after, :each) { hyperion.teardown }
+    rspec_hooks.register(:prepend, :after, :each) { hyperion.reset }
   end
 
   def rspec_after_example_hooks
