@@ -1,9 +1,11 @@
 require 'rspec'
 require 'hyperion_test/kim'
 require 'typhoeus'
+require 'hyperion_test'
 
 describe Hyperion::Kim do
   before(:all) do
+    Hyperion.teardown_cached_servers
     @port = 9001
     @kim = Hyperion::Kim.new(port: @port)
     @kim.start
@@ -40,6 +42,14 @@ describe Hyperion::Kim do
       ensure
         kim2.stop
       end
+    end
+    it 'continues working after a handler error' do
+      crash_command = proc { |r| r.path.include?('crash') }
+      greet_command = proc { |r| r.path.include?('greet') }
+      kim.add_handler(crash_command) { raise 'oops' }
+      kim.add_handler(greet_command) { 'hello' }
+      expect(get_code('/crash')).to eql 500
+      expect(get_code('/greet')).to eql 200
     end
   end
 

@@ -110,7 +110,8 @@ describe Hyperion::Requestor do
     context 'on a 400-level response' do
 
       def example(opts)
-        arrange(:get, [(400..499).to_a.sample, {}, opts[:response]])
+        code = ((400..499).to_a - [404]).sample
+        arrange(:get, [code, {}, opts[:response]])
         expect{request(@route)}.to raise_error HyperionError, opts[:error]
       end
 

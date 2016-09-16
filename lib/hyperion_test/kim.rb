@@ -69,6 +69,7 @@ class Hyperion
             Rack::Handler::WEBrick.run(method(:handle_request), opts) do |webrick|
               q.push(webrick)
             end
+            $stderr.puts "Hyperion fake server on port #{@port} exited unexpectedly!" unless @stopped
           end
           @webrick = q.pop
         end

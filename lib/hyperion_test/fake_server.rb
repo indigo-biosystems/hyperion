@@ -34,6 +34,10 @@ class Hyperion
       end
     end
 
+    def clear_routes
+      @kim.clear_handlers
+    end
+
     def teardown
       @kim.stop
     end
