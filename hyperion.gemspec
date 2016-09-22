@@ -1,1 +1,0 @@
-hyperion_http.gemspec

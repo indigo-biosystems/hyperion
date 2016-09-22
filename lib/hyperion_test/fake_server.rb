@@ -6,6 +6,7 @@ require 'hyperion_test/fake_server/types'
 require 'hyperion_test/fake_server/config'
 require 'hyperion_test/kim'
 require 'hyperion_test/kim/matchers'
+require 'hyperion_test/server_pool'
 
 class Hyperion
   class FakeServer
