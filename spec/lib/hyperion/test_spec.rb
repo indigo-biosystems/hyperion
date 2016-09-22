@@ -210,6 +210,18 @@ describe Hyperion do
     expect(result.body).to eql({'user' => 'new user'})
   end
 
+  it 'forgets routes after being reset' do
+    Hyperion.fake('https://www.google.com') do |svr|
+      svr.allow(:get, '/webhp') { 'fake google' }
+    end
+    result = Hyperion.request(RestRoute.new(:get, 'https://www.google.com/webhp'))
+    expect(result.body).to include 'fake google'
+    Hyperion.reset
+    result = Hyperion.request(RestRoute.new(:get, 'https://www.google.com/webhp'))
+    expect(result.status).to eql HyperionStatus::SUCCESS
+    expect(result.body).to include 'Google Search'
+  end
+
   def success_response(body)
     [200, {'Content-Type' => 'application/json'}, write(body, :json)]
   end

@@ -75,8 +75,9 @@ class Hyperion
               Rack::Handler::WEBrick.run(method(:handle_request), opts) do |webrick|
                 q.push(webrick)
               end
-            ensure
+            rescue Exception => e
               $stderr.puts "Hyperion fake server on port #{@port} exited unexpectedly!" unless @stopped
+              raise e
             end
           end
           @webrick = q.pop
@@ -159,9 +160,9 @@ class Hyperion
 
     def handle(req)
       pred_value, func = @handlers.lazy
-        .map { |h| [h.pred.call(req), h.func] }
-        .select { |(pv, _)| pv }
-        .first || [nil, no_route_matched_func]
+                           .map { |h| [h.pred.call(req), h.func] }
+                           .select { |(pv, _)| pv }
+                           .first || [nil, no_route_matched_func]
       func.call(pred_value.is_a?(Request) ? pred_value : req)
     end
 
