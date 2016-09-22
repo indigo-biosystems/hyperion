@@ -27,27 +27,26 @@ class Hyperion
     # Clear routes but don't stop servers. Meant to be called between tests.
     # Starting/stopping servers is relatively slow. They can be reused.
     def reset
-      servers.values.each(&:clear_routes)
+      servers.values.each { |s| server_pool.check_in(s) }
+      servers.clear
       @configured = false
     end
 
     # Stop all servers. This should only need to be called by tests that use
     # Kim directly (like kim_spec.rb).
     def teardown_cached_servers
-      servers.values.each(&:teardown)
-      servers.clear
-      @configured = false
+      reset
+      server_pool.clear
     end
 
     private
 
     def servers
-      @servers ||= Hash.new{|hash, key| hash[key] = FakeServer.new(next_port)}
+      @servers ||= Hash.new { |hash, key| hash[key] = server_pool.check_out }
     end
 
-    def next_port
-      @last_port ||= 9000
-      @last_port += 1
+    def server_pool
+      @server_pool ||= ServerPool.new
     end
 
     private
