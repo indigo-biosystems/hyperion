@@ -4,7 +4,7 @@ $LOAD_PATH.unshift(lib) unless $LOAD_PATH.include?(lib)
 
 Gem::Specification.new do |spec|
   spec.name          = 'hyperion_http'
-  spec.version       = '0.4.0'
+  spec.version       = '0.5.0'
   spec.authors       = ['Indigo BioAutomation, Inc.']
   spec.email         = ['pwinton@indigobio.com']
   spec.summary       = 'Ruby REST client'
@@ -27,7 +27,7 @@ Gem::Specification.new do |spec|
   spec.add_runtime_dependency 'abstractivator', '~> 0.0'
   spec.add_runtime_dependency 'activesupport'
   spec.add_runtime_dependency 'immutable_struct', '~> 1.1'
-  spec.add_runtime_dependency 'oj', '~> 2.12'
+  spec.add_runtime_dependency 'oj', '~> 3.0'
   spec.add_runtime_dependency 'typhoeus', '~> 0.7'
   spec.add_runtime_dependency 'rack'
   spec.add_runtime_dependency 'logatron'
