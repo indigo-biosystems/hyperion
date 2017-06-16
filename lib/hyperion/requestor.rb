@@ -12,6 +12,9 @@ class Hyperion
     #   HyperionResult and returns the final value to return from `request`
     # @option opts [Proc] :render A transformer, usually a proc returned by
     #   `as` or `as_many`. Only called on HTTP 200.
+    # @option opts [Integer] :timeout The limit of the entire request in seconds.
+    #   The default is 0 which means there will be no timeout during transfer;
+    #   there still may be a timeout during connection.
     # @yield [rendered] Yields to allow an additional transformation.
     #   Only called on HTTP 200.
     def request(route, opts={}, &project)
@@ -21,10 +24,11 @@ class Hyperion
       body = opts[:body]
       headers = opts[:headers] || {}
       additional_handler_hash = opts[:also_handle] || {}
+      timeout = opts[:timeout] || 0
       render = opts[:render] || Proc.identity
       project = project || Proc.identity
 
-      Hyperion.request(route, body, headers) do |result|
+      Hyperion.request(route, body: body, additional_headers: headers, timeout: timeout) do |result|
         all_handlers = [hash_handler(additional_handler_hash),
                         handler_from_including_class,
                         built_in_handler(project, render)]

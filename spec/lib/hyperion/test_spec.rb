@@ -31,7 +31,7 @@ describe Hyperion do
       result = Hyperion.request(get_user_route)
       expect_success(result, {'name' => 'freddy'})
 
-      result = Hyperion.request(post_greeting_route, write({'name' => 'freddy'}, :json))
+      result = Hyperion.request(post_greeting_route, body: write({'name' => 'freddy'}, :json))
       expect_success(result, {'greeting' => 'hello, freddy'})
     end
     it 'returns 404 if a requested route is not stubbed' do
@@ -96,7 +96,7 @@ describe Hyperion do
 
     result = Hyperion.request(RestRoute.new(:post, 'http://somesite.org/users/0',
                                             user_response_params, PayloadDescriptor.new(:json)),
-                              write({'name' => 'annie'}, :json))
+                              body: write({'name' => 'annie'}, :json))
     expect(result.body).to eql({'updated' => {'name' => 'annie'}})
   end
 
