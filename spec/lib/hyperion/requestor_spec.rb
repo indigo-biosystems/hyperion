@@ -19,14 +19,22 @@ describe Hyperion::Requestor do
   include Hyperion::Requestor
 
   def arrange(method, response)
-    @route = RestRoute.new(method, 'http://indigo.com/things',
-                           ResponseDescriptor.new('thing', 1, :json),
-                           PayloadDescriptor.new(:json))
-
+    create_route(method)
     fake_route(@route) do |request|
       @request = request
       response
     end
+  end
+
+  def arrange_timeout(method)
+    create_route(method)
+    fake_route(@route) { sleep 2 }
+  end
+
+  def create_route(method)
+    @route = RestRoute.new(method, 'http://indigo.com/things',
+                           ResponseDescriptor.new('thing', 1, :json),
+                           PayloadDescriptor.new(:json))
   end
 
   def assert_result(expected_result)
@@ -54,9 +62,10 @@ describe Hyperion::Requestor do
   end
 
   it 'makes requests with a timeout' do
-    arrange(:get, {'a' => 'b'})
-    expect(Hyperion).to receive(:request).with(@route, body: nil, additional_headers: {}, timeout: 2)
-    @result = request(@route, timeout: 2)
+    arrange_timeout(:get)
+    error = 'oops: time out'
+    handlers = {HyperionStatus::TIMED_OUT => proc { raise error }}
+    expect { request(@route, timeout: 1, also_handle: handlers) }.to raise_error error
   end
 
   it 'renders the response with the render proc' do
