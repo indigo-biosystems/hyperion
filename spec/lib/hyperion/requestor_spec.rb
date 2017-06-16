@@ -42,7 +42,7 @@ describe Hyperion::Requestor do
   it 'makes requests with additional headers' do 
     headers = {'X-my-header' => 'value'}
     arrange(:get, {'a' => 'b'})
-    expect(Hyperion).to receive(:request).with(@route, nil, headers)
+    expect(Hyperion).to receive(:request).with(@route, body: nil, additional_headers: headers, timeout: 0)
     @result = request(@route, headers: headers)
   end
 
@@ -51,6 +51,12 @@ describe Hyperion::Requestor do
     @result = request(@route, body: {'the' => 'body'})
     assert_result({'a' => 'b'})
     expect(@request.body).to eql({'the' => 'body'})
+  end
+
+  it 'makes requests with a timeout' do
+    arrange(:get, {'a' => 'b'})
+    expect(Hyperion).to receive(:request).with(@route, body: nil, additional_headers: {}, timeout: 2)
+    @result = request(@route, timeout: 2)
   end
 
   it 'renders the response with the render proc' do

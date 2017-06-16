@@ -23,10 +23,10 @@ describe Hyperion do
       )
 
       expect(Hyperion::Typho).to receive(:request).
-                                   with(uri, {method: method, headers: expected_headers, body: 'Ventura'}).
+                                   with(uri, {method: method, headers: expected_headers, body: 'Ventura', timeout: 1}).
                                    and_return(make_typho_response(200, write({'foo' => 'bar'}, :json)))
 
-      result = Hyperion.request(route, body, additional_headers)
+      result = Hyperion.request(route, body: body, additional_headers: additional_headers, timeout: 1)
       expect(result).to be_a HyperionResult
       expect(result.status).to eql HyperionStatus::SUCCESS
       expect(result.code).to eql 200
@@ -53,16 +53,16 @@ describe Hyperion do
       end
       it 'serializes the payload' do
         expect(Hyperion::Typho).to receive(:request).
-                                     with(uri, {method: method, headers: expected_headers, body: '{"c":"d"}'}).
+                                     with(uri, {method: method, headers: expected_headers, body: '{"c":"d"}', timeout: 0}).
                                      and_return(make_typho_response(200, write({}, :json)))
-        Hyperion.request(route, {'c' => 'd'})
+        Hyperion.request(route, body: {'c' => 'd'})
       end
       it 'deserializes 400-level errors to ClientErrorResponse' do
         client_error = ClientErrorResponse.new('oops', [], ClientErrorCode::MISSING)
         allow(Hyperion::Typho).to receive(:request).
-                                    with(uri, {method: method, headers: expected_headers, body: '{"c":"d"}'}).
+                                    with(uri, {method: method, headers: expected_headers, body: '{"c":"d"}', timeout: 0}).
                                     and_return(make_typho_response(400, write(client_error.as_json, :json)))
-        result = Hyperion.request(route, {'c' => 'd'})
+        result = Hyperion.request(route, body: {'c' => 'd'})
         expect(result.body).to be_a ClientErrorResponse
         expect(result.body.message).to eql 'oops'
         expect(result.body.code).to eql ClientErrorCode::MISSING
