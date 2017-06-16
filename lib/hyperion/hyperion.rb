@@ -15,12 +15,13 @@ class Hyperion
   # @param body [String] the body to send with POST or PUT
   # @param additional_headers [Hash] headers to send in addition to the ones
   #   already determined by the route. Example: +{'User-Agent' => 'Mozilla/5.0'}+
+  # @param timeout [Integer] The limit of the entire request in seconds
   # @yield [result] yields the result if a block is provided
   # @yieldparam [HyperionResult]
   # @return [HyperionResult, Object] If a block is provided, returns the block's
   #   return value; otherwise, returns the result.
-  def self.request(route, body=nil, additional_headers={}, &block)
-    self.new(route).request(body, additional_headers, &block)
+  def self.request(route, body: nil, additional_headers: {}, timeout: 0, &block)
+    self.new(route).request(body, additional_headers, timeout, &block)
   end
 
   # @private
@@ -29,13 +30,14 @@ class Hyperion
   end
 
   # @private
-  def request(body=nil, additional_headers={}, &dispatch)
+  def request(body, additional_headers, timeout, &dispatch)
     uri = transform_uri(route.uri).to_s
     with_request_logging(route, uri, route_headers(route)) do
       typho_result = Typho.request(uri,
                                    method: route.method,
                                    headers: build_headers(additional_headers),
-                                   body: write(body, route.payload_descriptor))
+                                   body: write(body, route.payload_descriptor),
+                                   timeout: timeout)
       hyperion_result_for(typho_result, dispatch)
     end
   end
