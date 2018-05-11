@@ -1,4 +1,6 @@
-# Hyperion
+# DEPRECATED: this code	has moved into ascent-web
+
+# ~~Hyperion~~
 [![Build Status](https://travis-ci.org/indigo-biosystems/hyperion.svg)](https://travis-ci.org/indigo-biosystems/hyperion) 
 
 Hyperion is a Ruby REST client that follows certain conventions
